@@ -1,7 +1,163 @@
 @import 'tailwindcss';
+@import 'react-datepicker/dist/react-datepicker.css';
+
+/* Class-based dark mode for Tailwind v4 — `<html class="dark">` toggles it. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  html,
   body {
-    @apply m-0 antialiased text-slate-800 bg-slate-50;
+    @apply m-0 antialiased;
   }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      'Helvetica Neue',
+      Arial,
+      sans-serif;
+  }
+  /* Tailwind v4's preflight resets cursor on buttons — restore the friendly
+     pointer everywhere unless the button is explicitly disabled. */
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role='tab']:not(:disabled),
+  [role='switch']:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* react-datepicker — above modals (z-50), match app theme */
+.react-datepicker__portal {
+  z-index: 100 !important;
+}
+
+.bm-datepicker.react-datepicker {
+  font-family: inherit;
+  border-radius: 0.75rem;
+  border-color: rgb(226 232 240);
+  overflow: hidden;
+}
+
+.bm-datepicker .react-datepicker__header {
+  background: rgb(248 250 252);
+  border-bottom-color: rgb(226 232 240);
+}
+
+.bm-datepicker .react-datepicker__current-month,
+.bm-datepicker .react-datepicker-time__header,
+.bm-datepicker .react-datepicker-year-header {
+  color: rgb(15 23 42);
+}
+
+.bm-datepicker .react-datepicker__day-name,
+.bm-datepicker .react-datepicker__day {
+  color: rgb(51 65 85);
+}
+
+.bm-datepicker .react-datepicker__day:hover {
+  background: rgb(237 233 254);
+}
+
+.bm-datepicker .react-datepicker__day--selected,
+.bm-datepicker .react-datepicker__day--keyboard-selected {
+  background: rgb(139 92 246) !important;
+  color: white !important;
+}
+
+.bm-datepicker .react-datepicker__day--outside-month {
+  color: rgb(148 163 184);
+}
+
+.bm-datepicker .react-datepicker__navigation-icon::before {
+  border-color: rgb(71 85 105);
+}
+
+.bm-datepicker .react-datepicker__time-container {
+  border-left-color: rgb(226 232 240);
+}
+
+.bm-datepicker .react-datepicker__time-container .react-datepicker__time {
+  background: white;
+}
+
+.bm-datepicker .react-datepicker__time-list-item:hover {
+  background: rgb(237 233 254) !important;
+}
+
+.bm-datepicker .react-datepicker__time-list-item--selected {
+  background: rgb(139 92 246) !important;
+  color: white !important;
+}
+
+.dark .bm-datepicker.react-datepicker {
+  background: rgb(15 23 42);
+  border-color: rgb(51 65 85);
+}
+
+.dark .bm-datepicker .react-datepicker__header {
+  background: rgb(30 41 59);
+  border-bottom-color: rgb(51 65 85);
+}
+
+.dark .bm-datepicker .react-datepicker__current-month,
+.dark .bm-datepicker .react-datepicker-time__header,
+.dark .bm-datepicker .react-datepicker-year-header {
+  color: rgb(241 245 249);
+}
+
+.dark .bm-datepicker .react-datepicker__day-name,
+.dark .bm-datepicker .react-datepicker__day {
+  color: rgb(226 232 240);
+}
+
+.dark .bm-datepicker .react-datepicker__day:hover {
+  background: rgb(51 65 85);
+}
+
+.dark .bm-datepicker .react-datepicker__day--outside-month {
+  color: rgb(100 116 139);
+}
+
+.dark .bm-datepicker .react-datepicker__navigation-icon::before {
+  border-color: rgb(203 213 225);
+}
+
+.dark .bm-datepicker .react-datepicker__time-container {
+  border-left-color: rgb(51 65 85);
+}
+
+.dark .bm-datepicker .react-datepicker__time-container .react-datepicker__time {
+  background: rgb(15 23 42);
+}
+
+.dark .bm-datepicker .react-datepicker__time-list-item:hover {
+  background: rgb(51 65 85) !important;
+}
+
+.dark .bm-datepicker .react-datepicker__time-list-item--selected {
+  background: rgb(139 92 246) !important;
+  color: white !important;
 }

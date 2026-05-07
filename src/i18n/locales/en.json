@@ -1,0 +1,420 @@
+{
+  "app": {
+    "name": "BookingManager",
+    "tagline": "Hotel Suite",
+    "version": "v1.0.0"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "search": "Search…",
+    "noRecords": "No records yet.",
+    "page": "Page",
+    "of": "of",
+    "total": "total",
+    "prev": "Prev",
+    "next": "Next",
+    "active": "active",
+    "inactive": "inactive",
+    "none": "— none —",
+    "unassigned": "— unassigned —",
+    "joined": "Joined",
+    "created": "Created",
+    "status": "Status",
+    "areYouSure": "Are you sure?",
+    "yes": "Yes",
+    "no": "No",
+    "signOut": "Sign out",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "time": "Time"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginSubtitle": "Enter your email and password to continue.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Create an account for your hotel. Access opens after your account is verified.",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "phoneOptional": "Phone (optional)",
+    "newPassword": "New password (leave blank to keep)",
+    "passwordHint": "At least 6 characters",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "createOne": "Create one",
+    "welcomeBack": "Welcome back, {{name}}!",
+    "welcome": "Welcome to BookingManager!",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "registeredPending": "Account created. You can sign in once your account is activated.",
+    "heroTitle": "Hotel operations in one place.",
+    "heroBody": "Rooms, guests, and bookings in a clear, modern workspace."
+  },
+  "roles": {
+    "admin": "Admin",
+    "owner": "Owner",
+    "manager": "Manager",
+    "adminConsole": "Admin Console",
+    "ownerPortal": "Owner Portal",
+    "managerWorkspace": "Manager Workspace"
+  },
+  "nav": {
+    "overview": "Overview",
+    "dashboard": "Dashboard",
+    "today": "Today",
+    "owners": "Owners",
+    "hotels": "Hotels",
+    "myHotels": "My Hotels",
+    "rooms": "Rooms",
+    "customers": "Customers",
+    "bookings": "Bookings",
+    "notifications": "Notifications",
+    "help": "Help"
+  },
+  "dashboard": {
+    "adminTitle": "Admin overview",
+    "adminSubtitle": "Platform-wide health: owners, hotels, rooms, bookings & analytics in one place.",
+    "ownerTitle": "Owner dashboard",
+    "ownerSubtitle": "A live picture of your portfolio.",
+    "managerTitle": "Today at the hotel",
+    "managerSubtitle": "Live operations, arrivals and departures.",
+    "totalOwners": "Total owners",
+    "totalHotels": "Total hotels",
+    "totalRooms": "Total rooms",
+    "totalBookings": "Total bookings",
+    "totalCustomers": "Customers",
+    "hotels": "Hotels",
+    "rooms": "Rooms",
+    "bookings": "Bookings",
+    "occupancy": "Occupancy",
+    "occupancyRate": "{{value}}% occupancy",
+    "occupancyShort": "{{value}}%",
+    "available": "{{n}} available",
+    "occupied": "{{n}} occupied",
+    "checkInsToday": "Check-ins today",
+    "checkOutsToday": "Check-outs today",
+    "revenue": "Revenue",
+    "lifetime": "lifetime",
+    "trendTitle": "Booking & revenue trend",
+    "trendRange": "last 6 months",
+    "topHotels": "Top hotels by bookings",
+    "noBookings": "No bookings yet.",
+    "roomsBreakdown": "Rooms breakdown",
+    "upcomingArrivals": "Upcoming arrivals",
+    "next24h": "next 24 hours",
+    "noArrivals": "No upcoming arrivals.",
+    "snapshot": "Snapshot"
+  },
+  "analytics": {
+    "occupancySplit": "Occupancy split"
+  },
+  "owners": {
+    "title": "Owners",
+    "subtitle": "Hotel owners on the platform. New self-registered owners start inactive — flip the switch to activate them.",
+    "newOwner": "New owner",
+    "editOwner": "Edit owner",
+    "owner": "Owner",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterInactive": "Inactive",
+    "deleteTitle": "Delete owner?",
+    "deleteDesc": "The owner and their hotel ownership links will be removed. Hotels will become unowned.",
+    "createdToast": "Owner created",
+    "updatedToast": "Owner updated",
+    "deletedToast": "Owner deleted",
+    "activatedToast": "Owner activated",
+    "deactivatedToast": "Owner deactivated — their hotel team is now disabled",
+    "searchPh": "Search owners…"
+  },
+  "hotels": {
+    "title": "Hotels",
+    "subtitle": "All hotels on the platform with owner, room counts and occupancy.",
+    "myTitle": "My hotels",
+    "mySubtitle": "Hotels you own. Add new properties or edit existing ones.",
+    "newHotel": "New hotel",
+    "editHotel": "Edit hotel",
+    "hotel": "Hotel",
+    "name": "Hotel name",
+    "location": "Address",
+    "description": "Description",
+    "rooms": "Rooms",
+    "occupied": "Occupied",
+    "activeBookings": "Active bookings",
+    "selectOwner": "Select owner…",
+    "deleteTitle": "Delete hotel?",
+    "deleteDesc": "This will remove the hotel along with its rooms and bookings.",
+    "deleteOwnerDesc": "This will also remove all rooms and bookings under it.",
+    "createdToast": "Hotel created",
+    "updatedToast": "Hotel updated",
+    "deletedToast": "Hotel deleted",
+    "searchPh": "Search hotels…",
+    "searchMyPh": "Search my hotels…"
+  },
+  "rooms": {
+    "title": "Rooms",
+    "subtitle": "Manage rooms across your hotels.",
+    "subtitleReadOnly": "Read-only view of rooms in your assigned hotel.",
+    "newRoom": "New room",
+    "editRoom": "Edit room",
+    "room": "Room",
+    "roomNumber": "Room number",
+    "type": "Type",
+    "price": "Price",
+    "priceAmd": "Price (AMD per night)",
+    "capacity": "Capacity",
+    "selectHotel": "Select hotel…",
+    "deleteTitle": "Delete room?",
+    "deleteDesc": "This room and its bookings history will be removed.",
+    "createdToast": "Room created",
+    "updatedToast": "Room updated",
+    "deletedToast": "Room deleted",
+    "searchPh": "Search rooms…",
+    "type_single": "single",
+    "type_double": "double",
+    "type_suite": "suite",
+    "type_deluxe": "deluxe",
+    "type_family": "family",
+    "status_available": "available",
+    "status_occupied": "occupied",
+    "status_maintenance": "maintenance"
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Guests across your hotels.",
+    "subtitleManager":
+      "Guests for your assigned hotel: add profiles for walk-ins, or manage people who already have bookings here.",
+    "newCustomer": "New customer",
+    "editCustomer": "Edit customer",
+    "customer": "Customer",
+    "idDocument": "ID / Passport number",
+    "address": "Address",
+    "deleteTitle": "Delete customer?",
+    "deleteDesc": "The customer and their booking history will be removed.",
+    "createdToast": "Customer created",
+    "updatedToast": "Customer updated",
+    "deletedToast": "Customer deleted",
+    "searchPh": "Search customers…"
+  },
+  "bookings": {
+    "title": "Bookings",
+    "subtitle": "Reservations across your hotels with quick check-in / out actions.",
+    "newBooking": "New booking",
+    "editBooking": "Edit booking",
+    "guest": "Guest",
+    "room": "Room",
+    "dates": "Dates",
+    "amount": "Amount",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "defaultCheckInHint": "Default arrival 14:00",
+    "defaultCheckOutHint": "Default departure 12:00",
+    "computedTotal": "Total",
+    "pickDates": "Pick check-in and check-out to see the total.",
+    "nightsCalc": "{{nights}} night(s) × {{rate}}",
+    "nightCount": "{{n}} night(s)",
+    "notes": "Notes",
+    "selectRoom": "Select room…",
+    "selectCustomer": "Select customer…",
+    "newGuestOption": "New guest — fill details below",
+    "newGuestSection": "New guest details",
+    "newGuestHint": "A customer profile will be created and linked to this booking.",
+    "newGuestNameRequired": "Enter the guest's full name (at least 2 characters).",
+    "deleteTitle": "Delete booking?",
+    "deleteDesc": "This action cannot be undone.",
+    "createdToast": "Booking created",
+    "updatedToast": "Booking updated",
+    "deletedToast": "Booking deleted",
+    "statusToast": "Status → {{status}}",
+    "searchPh": "Search by guest, room, hotel…",
+    "actions": {
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "status": {
+      "pending": "pending",
+      "confirmed": "confirmed",
+      "checked_in": "checked in",
+      "checked_out": "checked out",
+      "cancelled": "cancelled"
+    }
+  },
+  "help": {
+    "title": "How to use BookingManager",
+    "subtitle": "Step-by-step: where to click and what to fill in with your account. Guides for other roles are not shown on this page.",
+    "onlyYourRole": "You only see instructions for your own role — each account type has different menu items and permissions.",
+    "forRole": "Your guide ({{role}})",
+    "stepsHeading": "What to do in the app",
+    "tips": "Tips",
+    "glossaryHeading": "Words you will see in forms and tables",
+    "unavailable": "Help could not be loaded.",
+    "glossary": {
+      "hotel": {
+        "term": "Hotel",
+        "def": "A property record: name, address and description, linked to an owner in the system."
+      },
+      "room": {
+        "term": "Room",
+        "def": "A bookable unit: number/type, nightly price in AMD, capacity and availability status."
+      },
+      "customer": {
+        "term": "Customer",
+        "def": "A guest profile (name, contact, ID) you pick when creating a booking."
+      },
+      "booking": {
+        "term": "Booking",
+        "def": "One room reserved for one customer from check-in date/time to check-out date/time."
+      }
+    },
+    "admin": {
+      "title": "Using the site as an administrator",
+      "intro": "Open everything from the left sidebar. Use the sequence below the first time you work through the panel.",
+      "steps": [
+        "Click \"Overview\" to see platform totals, charts and analytics.",
+        "Click \"Owners\". New self-registrations appear inactive: use the ON/OFF switch in each row so the person can sign in, or turn it off to block them. When you block an owner, their managers are blocked too.",
+        "Use the All / Active / Inactive filters above the table to find people faster.",
+        "Click \"Hotels\" to create a hotel or edit its name, address and description.",
+        "Open the bell (top right) for notifications; tap a row to mark it read, or use \"Mark all read\"."
+      ],
+      "quick": [
+        "Use language and theme switches in the header next to the bell.",
+        "If a new owner cannot log in, check Owners — they must be active first.",
+        "The bell can play a short sound when something new arrives."
+      ]
+    },
+    "owner": {
+      "title": "Using the site as a hotel owner",
+      "intro": "Your menu only lists your portfolio. Typical setup order is: hotels → rooms → customers → bookings.",
+      "steps": [
+        "Click \"Dashboard\" for occupancy, revenue and trends for your hotels.",
+        "Click \"My Hotels\" to add each property or edit its details.",
+        "Click \"Rooms\" and add or edit rooms: type, AMD price per night, capacity; make sure they belong to the right hotel.",
+        "Click \"Customers\" and create profiles for guests you will book often.",
+        "Click \"Bookings\", then \"New\": choose room and customer, set check-in and check-out (defaults 14:00 and 12:00). The total amount is calculated automatically.",
+        "Use the bell for real-time alerts about bookings and account changes."
+      ],
+      "quick": [
+        "Dates and times use 24-hour format everywhere.",
+        "Amounts are shown in AMD without decimals in lists.",
+        "Charts and tables respect dark mode and your language."
+      ]
+    },
+    "manager": {
+      "title": "Using the site as a manager",
+      "intro": "You operate one assigned hotel. Use the sidebar for Today, Rooms, Customers and Bookings.",
+      "steps": [
+        "Click \"Today\" to see today’s check-ins, check-outs and occupancy.",
+        "Click \"Customers\" to add guest profiles or edit people linked to your hotel (including walk-ins you register here).",
+        "Click \"Bookings\". Use the green action when the guest arrives, purple when they leave, red to cancel — the room status updates by itself.",
+        "Open \"Rooms\" to check availability (this screen may be read-only for some fields).",
+        "To delete a reservation you must ask an owner or administrator — managers cannot delete bookings here.",
+        "Use the bell so you do not miss booking or hotel updates."
+      ],
+      "quick": [
+        "You can edit dates and notes on a booking if your role allows that action.",
+        "If the owner account is turned off, your login will stop working on the next request.",
+        "Mark notification lines as read so the badge count stays accurate."
+      ]
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "allTitle": "All notifications",
+    "pageSubtitle": "Everything sent to your account. Open the bell in the header for a quick preview.",
+    "empty": "No notifications yet.",
+    "markAllRead": "Mark all read",
+    "markOneRead": "Mark read",
+    "unread": "New",
+    "viewAll": "View all notifications",
+    "content": {
+      "owner_registered": {
+        "title": "New owner registration",
+        "body": "{{ownerName}} ({{ownerEmail}}) registered and awaits activation."
+      },
+      "account_activated": {
+        "title": "Account activated",
+        "body": "Your account is now active. You can sign in."
+      },
+      "account_deactivated": {
+        "title": "Account deactivated",
+        "body": "Your account has been deactivated. Contact an administrator."
+      },
+      "owner_deactivated_manager": {
+        "title": "Hotel owner disabled",
+        "body": "Your hotel owner account was deactivated. Manager access is paused until the owner is re-enabled."
+      },
+      "booking_created": {
+        "title": "New booking",
+        "body": "{{customerName}} — {{hotelName}}, room {{roomNumber}}."
+      },
+      "booking_updated": {
+        "title": "Booking updated",
+        "body": "{{customerName}} — {{hotelName}}. {{statusPart}}",
+        "statusFromTo": "Status: {{from}} → {{to}}",
+        "statusCurrent": "Status: {{status}}"
+      },
+      "booking_removed": {
+        "title": "Booking removed",
+        "body": "{{customerName}} — {{hotelName}}: the booking was deleted."
+      }
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "validation": "Please check the fields and try again.",
+    "network": "No network connection. Check your internet and try again.",
+    "api": {
+      "managerNoHotel": "This manager has no hotel assigned.",
+      "customerNotFound": "Customer not found.",
+      "noAccessCustomer": "You do not have access to this customer.",
+      "noWriteCustomer": "You cannot edit this customer.",
+      "checkOutAfterCheckIn": "Check-out must be after check-in.",
+      "roomNotFound": "Room not found.",
+      "roomBookingOverlap": "This room already has a booking for those dates.",
+      "bookingNotFound": "Booking not found.",
+      "managersCannotDeleteBooking": "Managers cannot delete bookings.",
+      "noAccessRoom": "You do not have access to this room.",
+      "noReadBooking": "You do not have permission to view this booking.",
+      "noWriteBooking": "You do not have permission to change this booking.",
+      "emailInUse": "This email is already in use.",
+      "userNotFound": "User not found.",
+      "emailRegistered": "This email is already registered.",
+      "invalidCredentials": "Invalid email or password.",
+      "accountInactive": "Your account is inactive. An administrator must activate it.",
+      "ownerAccountDisabled": "The hotel owner account is currently disabled.",
+      "notificationNotFound": "Notification not found.",
+      "notAuthenticated": "You are not signed in.",
+      "forbiddenRole": "You do not have permission for this action.",
+      "invalidOrInactiveUser": "Your session is invalid or the account is inactive.",
+      "ownerInactiveManagerBlocked": "The hotel owner is inactive — manager access is disabled.",
+      "hotelNotFound": "Hotel not found.",
+      "noAccessHotel": "You do not have access to this hotel.",
+      "noWriteHotel": "You cannot edit this hotel.",
+      "ownerIdRequired": "Owner is required.",
+      "ownerNotFound": "Owner not found.",
+      "managersCannotCreateHotels": "Managers cannot create hotels.",
+      "ownerUserNotFound": "Owner user not found."
+    }
+  },
+  "notFound": {
+    "title": "404",
+    "body": "The page you're looking for doesn't exist.",
+    "goHome": "Go home"
+  }
+}
