@@ -34,8 +34,18 @@ export function AuthLayout({ title, subtitle, children, footer }) {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <Logo />
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <div className="flex shrink-0 rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-fuchsia-600 p-2.5 shadow-md ring-1 ring-slate-900/10 dark:ring-white/20">
+              <LogoMark size={40} />
+            </div>
+            <div className="min-w-0 leading-tight">
+              <div className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+                {t('app.name')}
+              </div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-violet-600 dark:text-violet-400">
+                {t('app.tagline')}
+              </div>
+            </div>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             {title}

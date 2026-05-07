@@ -10,6 +10,7 @@ import { DataTable } from '../../components/ui/DataTable'
 import { IconButton } from '../../components/ui/IconButton'
 import { Modal } from '../../components/ui/Modal'
 import { PageHeader } from '../../components/ui/PageHeader'
+import { phoneForSubmit } from '../../components/ui/PhoneInput'
 import { useAuth } from '../../context/AuthContext'
 import { formatDate } from '../../utils/format'
 
@@ -52,11 +53,15 @@ export function CustomersPage() {
     e.preventDefault()
     setBusy(true)
     try {
+      const body = {
+        ...editing,
+        phone: phoneForSubmit(editing.phone) || undefined,
+      }
       if (editing.id) {
-        await customers.update(editing.id, editing)
+        await customers.update(editing.id, body)
         toast.success(t('customers.updatedToast'))
       } else {
-        await customers.create(editing)
+        await customers.create(body)
         toast.success(t('customers.createdToast'))
       }
       setOpenForm(false)

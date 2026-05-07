@@ -1,11 +1,11 @@
-import { Lock, Mail, Phone, User } from 'lucide-react'
+import { Lock, Mail, User } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
-import { NumberInput } from '../../components/ui/NumberInput'
+import { PhoneInput, phoneForSubmit } from '../../components/ui/PhoneInput'
 import { useAuth } from '../../context/AuthContext'
 import { AuthLayout } from './AuthLayout'
 
@@ -29,7 +29,10 @@ export function RegisterPage() {
     }
     setBusy(true)
     try {
-      await register(form)
+      await register({
+        ...form,
+        phone: phoneForSubmit(form.phone) || undefined,
+      })
       toast.success(t('auth.registeredPending'), { duration: 6000 })
       navigate('/login', { replace: true })
     } catch {
@@ -73,10 +76,8 @@ export function RegisterPage() {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
-        <NumberInput
+        <PhoneInput
           label={t('auth.phoneOptional')}
-          placeholder="37499000000"
-          leadingIcon={<Phone size={16} />}
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />

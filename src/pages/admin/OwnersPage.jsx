@@ -9,7 +9,7 @@ import { DataTable } from '../../components/ui/DataTable'
 import { IconButton } from '../../components/ui/IconButton'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
-import { NumberInput } from '../../components/ui/NumberInput'
+import { PhoneInput, phoneForSubmit } from '../../components/ui/PhoneInput'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { Switch } from '../../components/ui/Switch'
 import { formatDate } from '../../utils/format'
@@ -58,12 +58,21 @@ export function OwnersPage() {
     setBusy(true)
     try {
       if (editing.id) {
-        const payload = { ...editing, role: ROLE }
+        const payload = {
+          ...editing,
+          role: ROLE,
+          phone: phoneForSubmit(editing.phone) || undefined,
+        }
         if (!payload.password) delete payload.password
         await users.update(editing.id, payload)
         toast.success(t('owners.updatedToast'))
       } else {
-        await users.create({ ...editing, role: ROLE, isActive: true })
+        await users.create({
+          ...editing,
+          role: ROLE,
+          isActive: true,
+          phone: phoneForSubmit(editing.phone) || undefined,
+        })
         toast.success(t('owners.createdToast'))
       }
       setOpenForm(false)
@@ -260,13 +269,12 @@ export function OwnersPage() {
               }
               required
             />
-            <NumberInput
+            <PhoneInput
               label={t('auth.phone')}
               value={editing.phone || ''}
               onChange={(e) =>
                 setEditing({ ...editing, phone: e.target.value })
               }
-              placeholder="37499000000"
             />
             <Input
               label={editing.id ? t('auth.newPassword') : t('auth.password')}

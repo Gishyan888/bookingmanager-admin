@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Input, Textarea } from '../ui/Input'
-import { NumberInput } from '../ui/NumberInput'
+import { PhoneInput } from '../ui/PhoneInput'
 import { Button } from '../ui/Button'
 
 export function CustomerForm({
@@ -27,11 +27,10 @@ export function CustomerForm({
           value={value.email || ''}
           onChange={(e) => onChange({ ...value, email: e.target.value })}
         />
-        <NumberInput
+        <PhoneInput
           label={t('auth.phone')}
           value={value.phone || ''}
           onChange={(e) => onChange({ ...value, phone: e.target.value })}
-          placeholder="37499000000"
         />
       </div>
       <Input

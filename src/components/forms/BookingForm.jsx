@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Input, Select, Textarea } from '../ui/Input'
-import { NumberInput } from '../ui/NumberInput'
+import { PhoneInput } from '../ui/PhoneInput'
 import { Button } from '../ui/Button'
 import { DateTimePicker } from '../ui/DateTimePicker'
 import { computeNights, formatAMD } from '../../utils/format'
@@ -130,7 +130,7 @@ export function BookingForm({
                 })
               }
             />
-            <NumberInput
+            <PhoneInput
               label={t('auth.phone')}
               value={value.newCustomer?.phone ?? ''}
               onChange={(e) =>
@@ -142,7 +142,6 @@ export function BookingForm({
                   },
                 })
               }
-              placeholder="37499000000"
             />
           </div>
           <Input

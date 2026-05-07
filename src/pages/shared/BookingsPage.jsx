@@ -19,6 +19,7 @@ import { DataTable } from '../../components/ui/DataTable'
 import { IconButton } from '../../components/ui/IconButton'
 import { Modal } from '../../components/ui/Modal'
 import { PageHeader } from '../../components/ui/PageHeader'
+import { phoneForSubmit } from '../../components/ui/PhoneInput'
 import { useAuth } from '../../context/AuthContext'
 import { computeNights, formatAMD, formatDateTime } from '../../utils/format'
 
@@ -124,7 +125,7 @@ export function BookingsPage() {
         const created = await customers.create({
           name: nc.name.trim(),
           email: nc.email?.trim() || undefined,
-          phone: nc.phone?.trim() || undefined,
+          phone: phoneForSubmit(nc.phone) || undefined,
           idDocument: nc.idDocument?.trim() || undefined,
           address: nc.address?.trim() || undefined,
         })
