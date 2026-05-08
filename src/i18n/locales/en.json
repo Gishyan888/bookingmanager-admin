@@ -232,6 +232,7 @@
     "editCustomer": "Edit customer",
     "customer": "Customer",
     "idDocument": "ID / Passport number",
+    "description": "Description",
     "address": "Address",
     "deleteTitle": "Delete customer?",
     "deleteDesc": "The customer and their booking history will be removed.",

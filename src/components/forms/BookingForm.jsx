@@ -16,7 +16,7 @@ const STATUS = [
 const NEW_GUEST = '__new_guest__'
 
 function emptyNewCustomer() {
-  return { name: '', email: '', phone: '', idDocument: '', address: '' }
+  return { name: '', email: '', phone: '', idDocument: '', description: '' }
 }
 
 export function BookingForm({
@@ -34,6 +34,26 @@ export function BookingForm({
   const room = rooms.find((r) => r.id === value.roomId)
   const nights = computeNights(value.checkIn, value.checkOut)
   const computedTotal = room ? Number(room.price) * nights : 0
+
+  const autoCheckOutFromCheckIn = (checkInValue) => {
+    if (!checkInValue) return value.checkOut
+    const ci = new Date(checkInValue)
+    if (Number.isNaN(ci.getTime())) return value.checkOut
+
+    const currentCo = value.checkOut ? new Date(value.checkOut) : null
+    const next = new Date(ci)
+    next.setDate(next.getDate() + 1)
+
+    // Keep chosen checkout time; fallback to default 12:00.
+    if (currentCo && !Number.isNaN(currentCo.getTime())) {
+      next.setHours(currentCo.getHours(), currentCo.getMinutes(), 0, 0)
+    } else {
+      next.setHours(12, 0, 0, 0)
+    }
+
+    const pad = (n) => String(n).padStart(2, '0')
+    return `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}T${pad(next.getHours())}:${pad(next.getMinutes())}`
+  }
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
@@ -82,15 +102,15 @@ export function BookingForm({
         <option value="" disabled>
           {t('bookings.selectCustomer')}
         </option>
+        {!isEdit ? (
+          <option value={NEW_GUEST}>{t('bookings.newGuestOption')}</option>
+        ) : null}
         {customers.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
             {c.email ? ` — ${c.email}` : ''}
           </option>
         ))}
-        {!isEdit ? (
-          <option value={NEW_GUEST}>{t('bookings.newGuestOption')}</option>
-        ) : null}
       </Select>
 
       {!isEdit && value.useNewCustomer ? (
@@ -158,15 +178,15 @@ export function BookingForm({
             }
           />
           <Textarea
-            label={t('customers.address')}
+            label={t('customers.description')}
             rows={2}
-            value={value.newCustomer?.address ?? ''}
+            value={value.newCustomer?.description ?? ''}
             onChange={(e) =>
               onChange({
                 ...value,
                 newCustomer: {
                   ...(value.newCustomer ?? emptyNewCustomer()),
-                  address: e.target.value,
+                  description: e.target.value,
                 },
               })
             }
@@ -178,7 +198,13 @@ export function BookingForm({
         <DateTimePicker
           label={t('bookings.checkIn')}
           value={value.checkIn}
-          onChange={(v) => onChange({ ...value, checkIn: v })}
+          onChange={(v) =>
+            onChange({
+              ...value,
+              checkIn: v,
+              checkOut: autoCheckOutFromCheckIn(v),
+            })
+          }
           hint={t('bookings.defaultCheckInHint')}
           required
         />

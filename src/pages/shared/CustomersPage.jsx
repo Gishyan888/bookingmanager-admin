@@ -41,11 +41,24 @@ export function CustomersPage() {
   }, [page, search])
 
   const openCreate = () => {
-    setEditing({ name: '', email: '', phone: '', idDocument: '', address: '' })
+    setEditing({
+      name: '',
+      email: '',
+      phone: '',
+      idDocument: '',
+      description: '',
+    })
     setOpenForm(true)
   }
   const openEdit = (c) => {
-    setEditing({ ...c })
+    setEditing({
+      id: c.id,
+      name: c.name || '',
+      email: c.email || '',
+      phone: c.phone || '',
+      idDocument: c.idDocument || '',
+      description: c.description ?? c.address ?? '',
+    })
     setOpenForm(true)
   }
 
@@ -54,8 +67,11 @@ export function CustomersPage() {
     setBusy(true)
     try {
       const body = {
-        ...editing,
+        name: editing.name,
+        email: editing.email || undefined,
         phone: phoneForSubmit(editing.phone) || undefined,
+        idDocument: editing.idDocument || undefined,
+        description: editing.description || undefined,
       }
       if (editing.id) {
         await customers.update(editing.id, body)

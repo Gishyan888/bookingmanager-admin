@@ -28,7 +28,7 @@ const toLocalInput = (d) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 
 function emptyNewCustomer() {
-  return { name: '', email: '', phone: '', idDocument: '', address: '' }
+  return { name: '', email: '', phone: '', idDocument: '', description: '' }
 }
 
 export function BookingsPage() {
@@ -80,7 +80,7 @@ export function BookingsPage() {
     co.setHours(12, 0, 0, 0)
     const useNewCustomer = customerList.length === 0
     setEditing({
-      roomId: roomList[0]?.id ?? '',
+      roomId: '',
       customerId: useNewCustomer ? '' : customerList[0]?.id ?? '',
       useNewCustomer,
       newCustomer: emptyNewCustomer(),
@@ -127,7 +127,7 @@ export function BookingsPage() {
           email: nc.email?.trim() || undefined,
           phone: phoneForSubmit(nc.phone) || undefined,
           idDocument: nc.idDocument?.trim() || undefined,
-          address: nc.address?.trim() || undefined,
+          description: nc.description?.trim() || undefined,
         })
         customerId = created.id
       }

@@ -232,6 +232,7 @@
     "editCustomer": "Изменить гостя",
     "customer": "Гость",
     "idDocument": "Номер документа",
+    "description": "Описание",
     "address": "Адрес",
     "deleteTitle": "Удалить гостя?",
     "deleteDesc": "Гость и история его бронирований будут удалены.",

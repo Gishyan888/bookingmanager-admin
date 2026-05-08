@@ -39,10 +39,10 @@ export function CustomerForm({
         onChange={(e) => onChange({ ...value, idDocument: e.target.value })}
       />
       <Textarea
-        label={t('customers.address')}
+        label={t('customers.description')}
         rows={2}
-        value={value.address || ''}
-        onChange={(e) => onChange({ ...value, address: e.target.value })}
+        value={value.description || ''}
+        onChange={(e) => onChange({ ...value, description: e.target.value })}
       />
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="secondary" type="button" onClick={onCancel}>
