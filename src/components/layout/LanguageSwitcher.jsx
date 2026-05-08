@@ -3,6 +3,22 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SUPPORTED_LANGS } from '../../i18n'
 
+function FlagIcon({ lang, className = 'h-4 w-6' }) {
+  const [failed, setFailed] = useState(false)
+  if (failed || !lang.flagCode) {
+    return <span className="text-base leading-none">{lang.flag}</span>
+  }
+  return (
+    <img
+      src={`https://flagcdn.com/24x18/${lang.flagCode}.png`}
+      alt={lang.label}
+      className={className}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  )
+}
+
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -32,7 +48,7 @@ export function LanguageSwitcher() {
         className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
       >
         <Globe size={14} />
-        <span className="text-base leading-none">{current.flag}</span>
+        <FlagIcon lang={current} />
         <span className="hidden sm:inline">{current.code.toUpperCase()}</span>
       </button>
       {open && (
@@ -57,7 +73,7 @@ export function LanguageSwitcher() {
                 }`}
               >
                 <span className="flex items-center gap-2">
-                  <span className="text-base leading-none">{l.flag}</span>
+                  <FlagIcon lang={l} />
                   {l.native}
                 </span>
                 {active && (

@@ -22,7 +22,6 @@ import { CustomersPage } from './pages/shared/CustomersPage'
 import { NotificationsPage } from './pages/shared/NotificationsPage'
 import { RoomsPage } from './pages/shared/RoomsPage'
 import { PageLoader } from './components/ui/PageLoader'
-import { GlobalRequestLoader } from './components/ui/GlobalRequestLoader'
 import { RedirectIfAuthed, RequireAuth } from './routes/RequireAuth'
 
 function RootRedirect() {
@@ -81,7 +80,6 @@ export default function App() {
           <AuthProvider>
             <NotificationProvider>
               <ToasterAdapter />
-              <GlobalRequestLoader />
               <Routes>
             <Route path="/" element={<RootRedirect />} />
 

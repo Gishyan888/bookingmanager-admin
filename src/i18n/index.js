@@ -6,9 +6,9 @@ import hy from './locales/hy.json'
 import ru from './locales/ru.json'
 
 export const SUPPORTED_LANGS = [
-  { code: 'en', label: 'English', native: 'English', flag: '🇬🇧' },
-  { code: 'ru', label: 'Russian', native: 'Русский', flag: '🇷🇺' },
-  { code: 'hy', label: 'Armenian', native: 'Հայերեն', flag: '🇦🇲' },
+  { code: 'en', label: 'English', native: 'English', flag: '🇬🇧', flagCode: 'gb' },
+  { code: 'ru', label: 'Russian', native: 'Русский', flag: '🇷🇺', flagCode: 'ru' },
+  { code: 'hy', label: 'Armenian', native: 'Հայերեն', flag: '🇦🇲', flagCode: 'am' },
 ]
 
 i18n
