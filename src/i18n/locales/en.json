@@ -103,7 +103,7 @@
   },
   "dashboard": {
     "adminTitle": "Admin overview",
-    "adminSubtitle": "Platform-wide health: owners, hotels, rooms, bookings & analytics in one place.",
+    "adminSubtitle": "High-level view only: total owners and total hotels.",
     "ownerTitle": "Owner dashboard",
     "ownerSubtitle": "A live picture of your portfolio.",
     "managerTitle": "Today at the hotel",
