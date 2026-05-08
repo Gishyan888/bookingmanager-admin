@@ -3,6 +3,9 @@ import {
   Building2,
   CalendarCheck,
   Crown,
+  Mail,
+  MessageCircle,
+  Phone,
   ShieldCheck,
   UserSquare2,
   Users,
@@ -45,7 +48,7 @@ function RoleGuideCard({ role, meta }) {
   const quick = t(meta.quickKey, { returnObjects: true }) ?? []
   return (
     <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-      <div className={`bg-gradient-to-br ${meta.accent} px-5 py-4 text-white`}>
+      <div className={`bg-linear-to-br ${meta.accent} px-5 py-4 text-white`}>
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 backdrop-blur-sm">
             <Icon size={20} />
@@ -128,6 +131,35 @@ export function HelpPage() {
       </p>
 
       <RoleGuideCard role={role} meta={meta} />
+
+      <div className="rounded-2xl border border-violet-200/70 bg-linear-to-r from-violet-50 to-indigo-50 p-4 dark:border-violet-500/20 dark:from-violet-500/10 dark:to-indigo-500/10">
+        <p className="mb-2 text-sm font-semibold text-violet-800 dark:text-violet-200">
+          Support contact
+        </p>
+        <div className="space-y-2 text-sm text-slate-700 dark:text-slate-200">
+          <a
+            href="tel:+37491511122"
+            className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/60 dark:hover:bg-slate-900/30"
+          >
+            <Phone size={15} className="text-violet-600 dark:text-violet-300" />
+            <span className="font-medium">+37491511122</span>
+            <span className="text-slate-500 dark:text-slate-400">
+              (Viber / WhatsApp / Telegram)
+            </span>
+          </a>
+          <a
+            href="mailto:eventlyarmenia@gmail.com"
+            className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/60 dark:hover:bg-slate-900/30"
+          >
+            <Mail size={15} className="text-violet-600 dark:text-violet-300" />
+            <span className="font-medium">eventlyarmenia@gmail.com</span>
+          </a>
+          <div className="flex items-center gap-2 px-1 text-xs text-slate-500 dark:text-slate-400">
+            <MessageCircle size={14} />
+            <span>Fastest support: Telegram / WhatsApp / Viber</span>
+          </div>
+        </div>
+      </div>
 
       {/* Shared glossary — terms used in forms; same for every role */}
       <div>

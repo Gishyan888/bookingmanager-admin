@@ -78,9 +78,6 @@ export function LoginPage() {
         <Button type="submit" className="w-full" loading={busy}>
           {t('auth.signIn')}
         </Button>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-          Contact: +37491511122 (Viber/WhatsApp/Telegram), eventlyarmenia@gmail.com
-        </div>
       </form>
     </AuthLayout>
   )
