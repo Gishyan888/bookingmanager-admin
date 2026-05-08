@@ -1,5 +1,6 @@
 import { LogOut, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { NotificationBell } from './NotificationBell'
@@ -26,17 +27,21 @@ export function Topbar({ onOpenSidebar }) {
       <ThemeSwitcher />
 
       <div className="hidden items-center gap-3 sm:flex">
-        <div className="text-right">
+        <Link to="/profile" className="text-right">
           <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
             {user?.name}
           </div>
           <div className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {user?.role ? t(`roles.${user.role}`) : ''}
           </div>
-        </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white">
+        </Link>
+        <Link
+          to="/profile"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white"
+          title="Edit profile"
+        >
           {user?.name?.[0]?.toUpperCase() ?? '?'}
-        </div>
+        </Link>
       </div>
 
       <button

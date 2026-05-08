@@ -68,6 +68,13 @@ export function AuthProvider({ children }) {
     return u
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    const u = await authApi.me()
+    localStorage.setItem('bm_user', JSON.stringify(u))
+    setUser(u)
+    return u
+  }, [])
+
   /**
    * Self-registration returns a pending response and sends an email OTP.
    * Caller should navigate to verify-email screen with the registered email.
@@ -84,8 +91,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, register, logout, refreshUser }),
+    [user, loading, login, register, logout, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

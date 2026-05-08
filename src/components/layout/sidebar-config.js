@@ -31,6 +31,7 @@ export const SIDEBAR_BY_ROLE = {
     items: [
       { to: '/owner', icon: LayoutDashboard, labelKey: 'nav.dashboard', end: true },
       { to: '/owner/hotels', icon: Building2, labelKey: 'nav.myHotels' },
+      { to: '/owner/managers', icon: Users, labelKey: 'nav.managers' },
       { to: '/owner/rooms', icon: BedDouble, labelKey: 'nav.rooms' },
       { to: '/owner/customers', icon: Users, labelKey: 'nav.customers' },
       { to: '/owner/bookings', icon: CalendarCheck, labelKey: 'nav.bookings' },

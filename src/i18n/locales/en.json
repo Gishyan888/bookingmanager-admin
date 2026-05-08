@@ -93,6 +93,7 @@
     "owners": "Owners",
     "hotels": "Hotels",
     "myHotels": "My Hotels",
+    "managers": "Managers",
     "rooms": "Rooms",
     "customers": "Customers",
     "bookings": "Bookings",
@@ -155,6 +156,19 @@
     "activatedToast": "Owner activated",
     "deactivatedToast": "Owner deactivated — their hotel team is now disabled",
     "searchPh": "Search owners…"
+  },
+  "managers": {
+    "title": "Managers",
+    "subtitle": "Manage managers assigned to your hotels.",
+    "newManager": "New manager",
+    "editManager": "Edit manager",
+    "manager": "Manager",
+    "deleteTitle": "Delete manager?",
+    "deleteDesc": "This manager account will be removed.",
+    "createdToast": "Manager created",
+    "updatedToast": "Manager updated",
+    "deletedToast": "Manager deleted",
+    "searchPh": "Search managers…"
   },
   "hotels": {
     "title": "Hotels",

@@ -17,9 +17,11 @@ import { HelpPage } from './pages/help/HelpPage'
 import { ManagerDashboard } from './pages/manager/ManagerDashboard'
 import { OwnerDashboard } from './pages/owner/OwnerDashboard'
 import { OwnerHotelsPage } from './pages/owner/OwnerHotelsPage'
+import { OwnerManagersPage } from './pages/owner/OwnerManagersPage'
 import { BookingsPage } from './pages/shared/BookingsPage'
 import { CustomersPage } from './pages/shared/CustomersPage'
 import { NotificationsPage } from './pages/shared/NotificationsPage'
+import { ProfilePage } from './pages/shared/ProfilePage'
 import { RoomsPage } from './pages/shared/RoomsPage'
 import { PageLoader } from './components/ui/PageLoader'
 import { RedirectIfAuthed, RequireAuth } from './routes/RequireAuth'
@@ -141,6 +143,7 @@ export default function App() {
             >
               <Route index element={<OwnerDashboard />} />
               <Route path="hotels" element={<OwnerHotelsPage />} />
+              <Route path="managers" element={<OwnerManagersPage />} />
               <Route path="rooms" element={<RoomsPage />} />
               <Route path="customers" element={<CustomersPage />} />
               <Route path="bookings" element={<BookingsPage />} />
@@ -182,6 +185,17 @@ export default function App() {
               }
             >
               <Route index element={<NotificationsPage />} />
+            </Route>
+
+            <Route
+              path="/profile"
+              element={
+                <RequireAuth>
+                  <AppLayout />
+                </RequireAuth>
+              }
+            >
+              <Route index element={<ProfilePage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

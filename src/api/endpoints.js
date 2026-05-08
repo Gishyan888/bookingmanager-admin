@@ -19,10 +19,22 @@ export const dashboard = {
 }
 
 export const users = {
+  me: () => api.get('/users/me').then((r) => r.data),
+  updateMe: (data) => api.patch('/users/me', data).then((r) => r.data),
   listOwners: (params) =>
     api.get('/users/owners', { params }).then((r) => r.data),
   myManagers: (params) =>
     api.get('/users/my-managers', { params }).then((r) => r.data),
+  createMyManager: (data) =>
+    api.post('/users/my-managers', data).then((r) => r.data),
+  updateMyManager: (id, data) =>
+    api.patch(`/users/my-managers/${id}`, data).then((r) => r.data),
+  activateMyManager: (id) =>
+    api.patch(`/users/my-managers/${id}/activate`).then((r) => r.data),
+  deactivateMyManager: (id) =>
+    api.patch(`/users/my-managers/${id}/deactivate`).then((r) => r.data),
+  removeMyManager: (id) =>
+    api.delete(`/users/my-managers/${id}`).then((r) => r.data),
   create: (data) => api.post('/users', data).then((r) => r.data),
   get: (id) => api.get(`/users/${id}`).then((r) => r.data),
   update: (id, data) => api.patch(`/users/${id}`, data).then((r) => r.data),
