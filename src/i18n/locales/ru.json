@@ -69,6 +69,7 @@
     "resendOtp": "Отправить OTP повторно",
     "otpSent": "OTP отправлен на вашу почту.",
     "forgotPassword": "Забыли пароль?",
+    "needHelp": "Нужна помощь?",
     "forgotTitle": "Сброс пароля",
     "forgotSubtitle": "Мы отправим 6-значный OTP на вашу почту для сброса пароля.",
     "sendOtp": "Отправить OTP",

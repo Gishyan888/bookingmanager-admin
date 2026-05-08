@@ -1,3 +1,4 @@
+import { Mail, Phone } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Logo, LogoMark } from '../../components/branding/Logo'
 import { LanguageSwitcher } from '../../components/layout/LanguageSwitcher'
@@ -61,6 +62,32 @@ export function AuthLayout({ title, subtitle, children, footer }) {
               {footer}
             </div>
           )}
+        </div>
+
+        {/* bottom-right support contact */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:justify-end sm:px-0">
+          <div className="pointer-events-auto rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 text-xs shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-violet-600 dark:text-violet-300">
+              {t('auth.needHelp', { defaultValue: 'Need help?' })}
+            </div>
+            <div className="flex flex-col gap-1 text-slate-700 dark:text-slate-200 sm:flex-row sm:items-center sm:gap-3">
+              <a
+                href="tel:+37491511122"
+                className="flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-300"
+              >
+                <Phone size={13} className="text-violet-600 dark:text-violet-300" />
+                <span className="font-medium">+374 91 511 122</span>
+              </a>
+              <span className="hidden h-3 w-px bg-slate-300 dark:bg-slate-700 sm:inline-block" />
+              <a
+                href="mailto:info@bookingmanager.online"
+                className="flex items-center gap-1.5 hover:text-violet-600 dark:hover:text-violet-300"
+              >
+                <Mail size={13} className="text-violet-600 dark:text-violet-300" />
+                <span className="font-medium">info@bookingmanager.online</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
