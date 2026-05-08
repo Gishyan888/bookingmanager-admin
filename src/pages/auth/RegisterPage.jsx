@@ -34,7 +34,7 @@ export function RegisterPage() {
         phone: phoneForSubmit(form.phone) || undefined,
       })
       toast.success(t('auth.registeredPending'), { duration: 6000 })
-      navigate('/login', { replace: true })
+      navigate('/verify-email', { replace: true, state: { email: form.email } })
     } catch {
       // toast handled by interceptor
     } finally {

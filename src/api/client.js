@@ -9,7 +9,33 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+let pendingRequests = 0
+const loadingListeners = new Set()
+
+function emitLoading() {
+  for (const listener of loadingListeners) {
+    listener(pendingRequests)
+  }
+}
+
+function beginRequest() {
+  pendingRequests += 1
+  emitLoading()
+}
+
+function endRequest() {
+  pendingRequests = Math.max(0, pendingRequests - 1)
+  emitLoading()
+}
+
+export function subscribeApiLoading(listener) {
+  loadingListeners.add(listener)
+  listener(pendingRequests)
+  return () => loadingListeners.delete(listener)
+}
+
 api.interceptors.request.use((config) => {
+  beginRequest()
   const token = localStorage.getItem('bm_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -18,8 +44,12 @@ api.interceptors.request.use((config) => {
 })
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    endRequest()
+    return res
+  },
   (err) => {
+    endRequest()
     const status = err?.response?.status
     const url = err?.config?.url || ''
     const rawMessage = err?.response?.data?.message ?? err?.message

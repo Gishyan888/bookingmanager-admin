@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import { Navigate, Route, BrowserRouter, Routes } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import { AuthProvider, ROLE, homeForRole, useAuth } from './context/AuthContext'
+import { ApiLoadingProvider } from './context/ApiLoadingContext'
 import { NotificationProvider } from './context/NotificationContext'
 import { ThemeProvider, useTheme } from './context/ThemeContext'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
@@ -10,6 +11,8 @@ import { AdminHotelsPage } from './pages/admin/HotelsPage'
 import { OwnersPage } from './pages/admin/OwnersPage'
 import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
+import { VerifyEmailPage } from './pages/auth/VerifyEmailPage'
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage'
 import { HelpPage } from './pages/help/HelpPage'
 import { ManagerDashboard } from './pages/manager/ManagerDashboard'
 import { OwnerDashboard } from './pages/owner/OwnerDashboard'
@@ -19,6 +22,7 @@ import { CustomersPage } from './pages/shared/CustomersPage'
 import { NotificationsPage } from './pages/shared/NotificationsPage'
 import { RoomsPage } from './pages/shared/RoomsPage'
 import { PageLoader } from './components/ui/PageLoader'
+import { GlobalRequestLoader } from './components/ui/GlobalRequestLoader'
 import { RedirectIfAuthed, RequireAuth } from './routes/RequireAuth'
 
 function RootRedirect() {
@@ -73,10 +77,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <ToasterAdapter />
-            <Routes>
+        <ApiLoadingProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <ToasterAdapter />
+              <GlobalRequestLoader />
+              <Routes>
             <Route path="/" element={<RootRedirect />} />
 
             <Route
@@ -92,6 +98,22 @@ export default function App() {
               element={
                 <RedirectIfAuthed>
                   <RegisterPage />
+                </RedirectIfAuthed>
+              }
+            />
+            <Route
+              path="/verify-email"
+              element={
+                <RedirectIfAuthed>
+                  <VerifyEmailPage />
+                </RedirectIfAuthed>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <RedirectIfAuthed>
+                  <ForgotPasswordPage />
                 </RedirectIfAuthed>
               }
             />
@@ -165,9 +187,10 @@ export default function App() {
             </Route>
 
             <Route path="*" element={<NotFound />} />
-            </Routes>
-          </NotificationProvider>
-        </AuthProvider>
+              </Routes>
+            </NotificationProvider>
+          </AuthProvider>
+        </ApiLoadingProvider>
       </ThemeProvider>
     </BrowserRouter>
   )

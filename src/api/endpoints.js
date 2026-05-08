@@ -3,6 +3,14 @@ import { api } from './client'
 export const auth = {
   login: (data) => api.post('/auth/login', data).then((r) => r.data),
   register: (data) => api.post('/auth/register', data).then((r) => r.data),
+  verifyEmailOtp: (data) =>
+    api.post('/auth/verify-email-otp', data).then((r) => r.data),
+  resendEmailOtp: (data) =>
+    api.post('/auth/resend-email-otp', data).then((r) => r.data),
+  requestPasswordReset: (data) =>
+    api.post('/auth/forgot-password/request', data).then((r) => r.data),
+  confirmPasswordReset: (data) =>
+    api.post('/auth/forgot-password/confirm', data).then((r) => r.data),
   me: () => api.get('/auth/me').then((r) => r.data),
 }
 

@@ -69,9 +69,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   /**
-   * Self-registration always lands the new owner in a "pending approval"
-   * state. We don't auto-sign-in — the caller should redirect to /login and
-   * surface the message returned by the API.
+   * Self-registration returns a pending response and sends an email OTP.
+   * Caller should navigate to verify-email screen with the registered email.
    */
   const register = useCallback(async (payload) => {
     const res = await authApi.register(payload)

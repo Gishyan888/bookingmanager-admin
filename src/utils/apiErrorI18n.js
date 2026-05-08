@@ -21,8 +21,11 @@ const API_MESSAGE_KEYS = {
   'Invalid credentials': 'errors.api.invalidCredentials',
   'Your account is inactive. An administrator must activate it.':
     'errors.api.accountInactive',
+  'Your account is inactive. Verify your email with OTP first.':
+    'errors.api.accountInactive',
   'The hotel owner account is currently disabled.':
     'errors.api.ownerAccountDisabled',
+  'Invalid or expired OTP': 'errors.api.invalidOtp',
   'Notification not found': 'errors.api.notificationNotFound',
   'Not authenticated': 'errors.api.notAuthenticated',
   'Invalid or inactive user': 'errors.api.invalidOrInactiveUser',
