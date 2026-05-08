@@ -243,14 +243,14 @@ export function OwnerManagersPage() {
               onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
             />
             <Select
-              label={t('hotels.selectHotel')}
+              label={t('rooms.selectHotel')}
               value={editing.assignedHotelId}
               onChange={(e) =>
                 setEditing({ ...editing, assignedHotelId: e.target.value })
               }
               required
             >
-              <option value="">{t('hotels.selectHotel')}</option>
+              <option value="">{t('rooms.selectHotel')}</option>
               {hotelOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
