@@ -148,11 +148,11 @@ export function HelpPage() {
             </span>
           </a>
           <a
-            href="mailto:eventlyarmenia@gmail.com"
+            href="mailto:info@bookingmanager.online"
             className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/60 dark:hover:bg-slate-900/30"
           >
             <Mail size={15} className="text-violet-600 dark:text-violet-300" />
-            <span className="font-medium">eventlyarmenia@gmail.com</span>
+            <span className="font-medium">info@bookingmanager.online</span>
           </a>
           <div className="flex items-center gap-2 px-1 text-xs text-slate-500 dark:text-slate-400">
             <MessageCircle size={14} />
