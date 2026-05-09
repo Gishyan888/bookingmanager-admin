@@ -89,7 +89,7 @@ function StatRow({ icon: Icon, label, value, percent, barClass }) {
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
         <div
-          className={`h-full rounded-full bg-linear-to-r ${barClass}`}
+          className={`h-full rounded-full bg-gradient-to-r ${barClass}`}
           style={{ width: `${Math.max(4, percent)}%` }}
         />
       </div>

@@ -25,7 +25,7 @@ export function Topbar({ onOpenSidebar }) {
       {/* Profile: visible on small screens (name block below is sm+ only) */}
       <Link
         to="/profile"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white shadow-sm ring-1 ring-violet-600/20 sm:hidden"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white shadow-sm ring-1 ring-violet-600/20 sm:hidden"
         title={t('profile.title')}
         aria-label={t('profile.title')}
       >
@@ -43,7 +43,7 @@ export function Topbar({ onOpenSidebar }) {
         </Link>
         <Link
           to="/profile"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white"
           title="Edit profile"
         >
           {user?.name?.[0]?.toUpperCase() ?? '?'}

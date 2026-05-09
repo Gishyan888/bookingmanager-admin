@@ -48,7 +48,7 @@ function RoleGuideCard({ role, meta }) {
   const quick = t(meta.quickKey, { returnObjects: true }) ?? []
   return (
     <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-      <div className={`bg-linear-to-br ${meta.accent} px-5 py-4 text-white`}>
+      <div className={`bg-gradient-to-br ${meta.accent} px-5 py-4 text-white`}>
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 backdrop-blur-sm">
             <Icon size={20} />
@@ -132,7 +132,7 @@ export function HelpPage() {
 
       <RoleGuideCard role={role} meta={meta} />
 
-      <div className="rounded-2xl border border-violet-200/70 bg-linear-to-r from-violet-50 to-indigo-50 p-4 dark:border-violet-500/20 dark:from-violet-500/10 dark:to-indigo-500/10">
+      <div className="rounded-2xl border border-violet-200/70 bg-gradient-to-r from-violet-50 to-indigo-50 p-4 dark:border-violet-500/20 dark:from-violet-500/10 dark:to-indigo-500/10">
         <p className="mb-2 text-sm font-semibold text-violet-800 dark:text-violet-200">
           Support contact
         </p>

@@ -1,8 +1,8 @@
-@import 'tailwindcss';
-@import 'react-datepicker/dist/react-datepicker.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Class-based dark mode for Tailwind v4 — `<html class="dark">` toggles it. */
-@custom-variant dark (&:where(.dark, .dark *));
+@import 'react-datepicker/dist/react-datepicker.css';
 
 @layer base {
   html,

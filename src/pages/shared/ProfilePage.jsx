@@ -134,7 +134,7 @@ export function ProfilePage() {
             </div>
 
             <div className="space-y-4 lg:col-span-4">
-              <div className="rounded-2xl border border-violet-100 bg-linear-to-br from-violet-50 to-white p-5 shadow-sm ring-1 ring-violet-100 dark:border-violet-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-violet-900/50">
+              <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-white p-5 shadow-sm ring-1 ring-violet-100 dark:border-violet-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-violet-900/50">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                     <Globe size={16} className="text-violet-600 dark:text-violet-300" />
@@ -178,7 +178,7 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-5 shadow-sm ring-1 ring-indigo-100 dark:border-indigo-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-indigo-900/50">
+              <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-5 shadow-sm ring-1 ring-indigo-100 dark:border-indigo-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-indigo-900/50">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
                     <Palette size={16} className="text-indigo-600 dark:text-indigo-300" />
