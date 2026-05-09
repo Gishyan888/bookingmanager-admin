@@ -51,13 +51,19 @@ function translateOne(msg) {
   if (s.startsWith('Forbidden: requires ')) {
     return i18n.t('errors.api.forbiddenRole')
   }
+  if (s.startsWith('property ') && s.includes(' should not exist')) {
+    const field = s
+      .replace(/^property\s+/i, '')
+      .replace(/\s+should not exist$/i, '')
+    return `${field}: ${i18n.t('errors.validation')}`
+  }
   if (VALIDATION_HINT.test(s)) {
-    return i18n.t('errors.validation')
+    return s
   }
   if (s === 'Network Error') {
     return i18n.t('errors.network')
   }
-  return i18n.t('errors.generic')
+  return s
 }
 
 /**

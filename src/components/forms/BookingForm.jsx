@@ -16,7 +16,7 @@ const STATUS = [
 const NEW_GUEST = '__new_guest__'
 
 function emptyNewCustomer() {
-  return { name: '', email: '', phone: '', idDocument: '', description: '' }
+  return { name: '', phone: '', idDocument: '', description: '' }
 }
 
 export function BookingForm({
@@ -108,7 +108,6 @@ export function BookingForm({
         {customers.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}
-            {c.email ? ` — ${c.email}` : ''}
           </option>
         ))}
       </Select>
@@ -135,35 +134,19 @@ export function BookingForm({
             }
             required
           />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Input
-              label={t('auth.email')}
-              type="email"
-              value={value.newCustomer?.email ?? ''}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  newCustomer: {
-                    ...(value.newCustomer ?? emptyNewCustomer()),
-                    email: e.target.value,
-                  },
-                })
-              }
-            />
-            <PhoneInput
-              label={t('auth.phone')}
-              value={value.newCustomer?.phone ?? ''}
-              onChange={(e) =>
-                onChange({
-                  ...value,
-                  newCustomer: {
-                    ...(value.newCustomer ?? emptyNewCustomer()),
-                    phone: e.target.value,
-                  },
-                })
-              }
-            />
-          </div>
+          <PhoneInput
+            label={t('auth.phone')}
+            value={value.newCustomer?.phone ?? ''}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                newCustomer: {
+                  ...(value.newCustomer ?? emptyNewCustomer()),
+                  phone: e.target.value,
+                },
+              })
+            }
+          />
           <Input
             label={t('customers.idDocument')}
             value={value.newCustomer?.idDocument ?? ''}

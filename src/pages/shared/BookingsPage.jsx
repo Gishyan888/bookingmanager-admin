@@ -28,7 +28,7 @@ const toLocalInput = (d) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 
 function emptyNewCustomer() {
-  return { name: '', email: '', phone: '', idDocument: '', description: '' }
+  return { name: '', phone: '', idDocument: '', description: '' }
 }
 
 export function BookingsPage() {
@@ -124,7 +124,6 @@ export function BookingsPage() {
         const nc = editing.newCustomer ?? emptyNewCustomer()
         const created = await customers.create({
           name: nc.name.trim(),
-          email: nc.email?.trim() || undefined,
           phone: phoneForSubmit(nc.phone) || undefined,
           idDocument: nc.idDocument?.trim() || undefined,
           description: nc.description?.trim() || undefined,

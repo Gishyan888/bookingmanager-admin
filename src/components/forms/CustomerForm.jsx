@@ -20,19 +20,11 @@ export function CustomerForm({
         onChange={(e) => onChange({ ...value, name: e.target.value })}
         required
       />
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label={t('auth.email')}
-          type="email"
-          value={value.email || ''}
-          onChange={(e) => onChange({ ...value, email: e.target.value })}
-        />
-        <PhoneInput
-          label={t('auth.phone')}
-          value={value.phone || ''}
-          onChange={(e) => onChange({ ...value, phone: e.target.value })}
-        />
-      </div>
+      <PhoneInput
+        label={t('auth.phone')}
+        value={value.phone || ''}
+        onChange={(e) => onChange({ ...value, phone: e.target.value })}
+      />
       <Input
         label={t('customers.idDocument')}
         value={value.idDocument || ''}

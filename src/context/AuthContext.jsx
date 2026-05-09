@@ -7,7 +7,9 @@ import {
   useState,
 } from 'react'
 import { auth as authApi } from '../api/endpoints'
+import i18n from '../i18n'
 import { setAuthToken } from '../api/client'
+import { useTheme } from './ThemeContext'
 
 const AuthContext = createContext(null)
 
@@ -37,8 +39,25 @@ function loadStoredUser() {
 }
 
 export function AuthProvider({ children }) {
+  const { setTheme } = useTheme()
   const [user, setUser] = useState(loadStoredUser)
   const [loading, setLoading] = useState(true)
+
+  const applyUserPreferences = useCallback(
+    (u) => {
+      const lang = u?.preferredLanguage || 'hy'
+      const theme = u?.preferredTheme || 'light'
+      try {
+        localStorage.setItem('bm_lang', lang)
+        localStorage.setItem('bm_theme', theme)
+      } catch {
+        // ignore
+      }
+      i18n.changeLanguage(lang)
+      setTheme(theme)
+    },
+    [setTheme],
+  )
 
   useEffect(() => {
     const token = localStorage.getItem('bm_token')
@@ -49,6 +68,7 @@ export function AuthProvider({ children }) {
     authApi
       .me()
       .then((u) => {
+        applyUserPreferences(u)
         setUser(u)
         localStorage.setItem('bm_user', JSON.stringify(u))
       })
@@ -63,17 +83,19 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const { token, user: u } = await authApi.login({ email, password })
     setAuthToken(token)
+    applyUserPreferences(u)
     localStorage.setItem('bm_user', JSON.stringify(u))
     setUser(u)
     return u
-  }, [])
+  }, [applyUserPreferences])
 
   const refreshUser = useCallback(async () => {
     const u = await authApi.me()
+    applyUserPreferences(u)
     localStorage.setItem('bm_user', JSON.stringify(u))
     setUser(u)
     return u
-  }, [])
+  }, [applyUserPreferences])
 
   /**
    * Self-registration returns a pending response and sends an email OTP.

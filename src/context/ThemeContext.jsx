@@ -34,7 +34,7 @@ function loadInitial() {
   } catch {
     // ignore
   }
-  return 'system'
+  return 'light'
 }
 
 export function ThemeProvider({ children }) {

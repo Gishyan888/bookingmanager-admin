@@ -43,7 +43,6 @@ export function CustomersPage() {
   const openCreate = () => {
     setEditing({
       name: '',
-      email: '',
       phone: '',
       idDocument: '',
       description: '',
@@ -54,7 +53,6 @@ export function CustomersPage() {
     setEditing({
       id: c.id,
       name: c.name || '',
-      email: c.email || '',
       phone: c.phone || '',
       idDocument: c.idDocument || '',
       description: c.description ?? c.address ?? '',
@@ -68,7 +66,6 @@ export function CustomersPage() {
     try {
       const body = {
         name: editing.name,
-        email: editing.email || undefined,
         phone: phoneForSubmit(editing.phone) || undefined,
         idDocument: editing.idDocument || undefined,
         description: editing.description || undefined,
@@ -114,7 +111,7 @@ export function CustomersPage() {
             {r.name}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
-            {r.email || '—'}
+            {r.idDocument || '—'}
           </div>
         </div>
       ),
