@@ -33,9 +33,11 @@ export function Sidebar({ open, onClose }) {
         </div>
 
         <div className="px-5 pt-4 pb-2">
-          <div
+          <NavLink
+            to="/profile"
+            onClick={onClose}
             className={clsx(
-              'rounded-xl bg-gradient-to-br p-3 text-white shadow-sm',
+              'block rounded-xl bg-gradient-to-br p-3 text-white shadow-sm outline-none ring-offset-2 transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-white/80',
               cfg.accent,
             )}
           >
@@ -46,7 +48,7 @@ export function Sidebar({ open, onClose }) {
             <div className="mt-1 truncate text-xs text-white/85">
               {user?.name}
             </div>
-          </div>
+          </NavLink>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-3">

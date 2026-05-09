@@ -46,7 +46,7 @@ const CustomInput = forwardRef(function DateTimePickerInput(
   ref,
 ) {
   const fieldClasses = clsx(
-    'block w-full cursor-pointer rounded-lg border-0 bg-white py-2 pl-9 pr-3 text-sm shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500',
+    'block w-full cursor-pointer rounded-lg border-0 bg-white py-2 pl-9 pr-3 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 md:text-sm',
     'text-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400',
     disabled && 'cursor-not-allowed opacity-60',
   )

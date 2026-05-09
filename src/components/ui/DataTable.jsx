@@ -41,7 +41,7 @@ export function DataTable({
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
                 placeholder={searchPlaceholder ?? t('common.search')}
-                className="block w-full rounded-lg border-0 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-800 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 transition focus:bg-white focus:ring-2 focus:ring-inset focus:ring-violet-500 dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-violet-400"
+                className="block w-full rounded-lg border-0 bg-slate-50 py-2 pl-9 pr-3 text-base text-slate-800 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 transition focus:bg-white focus:ring-2 focus:ring-inset focus:ring-violet-500 md:text-sm dark:bg-slate-800 dark:text-slate-100 dark:ring-slate-700 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-violet-400"
               />
             </div>
           ) : (

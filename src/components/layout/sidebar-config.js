@@ -1,12 +1,13 @@
 import {
   Bell,
+  BedDouble,
   Building2,
   CalendarCheck,
   Crown,
   HelpCircle,
   LayoutDashboard,
+  UserCircle,
   Users,
-  BedDouble,
 } from 'lucide-react'
 
 /**
@@ -22,6 +23,7 @@ export const SIDEBAR_BY_ROLE = {
       { to: '/admin/owners', icon: Crown, labelKey: 'nav.owners' },
       { to: '/admin/hotels', icon: Building2, labelKey: 'nav.hotels' },
       { to: '/notifications', icon: Bell, labelKey: 'nav.notifications' },
+      { to: '/profile', icon: UserCircle, labelKey: 'nav.profile' },
       { to: '/help', icon: HelpCircle, labelKey: 'nav.help' },
     ],
   },
@@ -36,6 +38,7 @@ export const SIDEBAR_BY_ROLE = {
       { to: '/owner/customers', icon: Users, labelKey: 'nav.customers' },
       { to: '/owner/bookings', icon: CalendarCheck, labelKey: 'nav.bookings' },
       { to: '/notifications', icon: Bell, labelKey: 'nav.notifications' },
+      { to: '/profile', icon: UserCircle, labelKey: 'nav.profile' },
       { to: '/help', icon: HelpCircle, labelKey: 'nav.help' },
     ],
   },
@@ -48,6 +51,7 @@ export const SIDEBAR_BY_ROLE = {
       { to: '/manager/customers', icon: Users, labelKey: 'nav.customers' },
       { to: '/manager/bookings', icon: CalendarCheck, labelKey: 'nav.bookings' },
       { to: '/notifications', icon: Bell, labelKey: 'nav.notifications' },
+      { to: '/profile', icon: UserCircle, labelKey: 'nav.profile' },
       { to: '/help', icon: HelpCircle, labelKey: 'nav.help' },
     ],
   },

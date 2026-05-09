@@ -22,6 +22,16 @@ export function Topbar({ onOpenSidebar }) {
 
       <NotificationBell />
 
+      {/* Profile: visible on small screens (name block below is sm+ only) */}
+      <Link
+        to="/profile"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 text-sm font-semibold text-white shadow-sm ring-1 ring-violet-600/20 sm:hidden"
+        title={t('profile.title')}
+        aria-label={t('profile.title')}
+      >
+        {user?.name?.[0]?.toUpperCase() ?? '?'}
+      </Link>
+
       <div className="hidden items-center gap-3 sm:flex">
         <Link to="/profile" className="text-right">
           <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">

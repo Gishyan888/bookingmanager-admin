@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { forwardRef } from 'react'
 
 const fieldBase =
-  'block w-full rounded-lg border-0 py-2 text-sm shadow-sm ring-1 ring-inset transition focus:ring-2 focus:ring-inset bg-white text-slate-800 placeholder:text-slate-400 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500'
+  'block w-full rounded-lg border-0 py-2 text-base shadow-sm ring-1 ring-inset transition focus:ring-2 focus:ring-inset bg-white text-slate-800 placeholder:text-slate-400 md:text-sm dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500'
 
 const ringOk =
   'ring-slate-200 focus:ring-violet-500 dark:ring-slate-700 dark:focus:ring-violet-400'
