@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { LanguageSwitcher } from '../../components/layout/LanguageSwitcher'
+import { ThemeSwitcher } from '../../components/layout/ThemeSwitcher'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { homeForRole, useAuth } from '../../context/AuthContext'
@@ -45,6 +47,10 @@ export function LoginPage() {
         </span>
       }
     >
+      <div className="mb-4 flex items-center justify-end gap-2">
+        <LanguageSwitcher />
+        <ThemeSwitcher />
+      </div>
       <form className="space-y-4" onSubmit={submit}>
         <Input
           label={t('auth.email')}

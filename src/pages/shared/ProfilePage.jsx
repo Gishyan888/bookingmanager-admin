@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Globe, Palette } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { users } from '../../api/endpoints'
@@ -83,7 +84,11 @@ export function ProfilePage() {
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                <Globe size={14} />
+                <span>{t('common.language')}</span>
+              </div>
               <Select
                 label={t('common.language')}
                 value={form.preferredLanguage}
@@ -97,6 +102,12 @@ export function ProfilePage() {
                   </option>
                 ))}
               </Select>
+            </div>
+            <div className="rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                <Palette size={14} />
+                <span>{t('common.theme')}</span>
+              </div>
               <Select
                 label={t('common.theme')}
                 value={form.preferredTheme}

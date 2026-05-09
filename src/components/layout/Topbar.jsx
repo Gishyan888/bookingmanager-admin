@@ -2,9 +2,7 @@ import { LogOut, Menu } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { LanguageSwitcher } from './LanguageSwitcher'
 import { NotificationBell } from './NotificationBell'
-import { ThemeSwitcher } from './ThemeSwitcher'
 
 export function Topbar({ onOpenSidebar }) {
   const { user, logout } = useAuth()
@@ -23,8 +21,6 @@ export function Topbar({ onOpenSidebar }) {
       <div className="flex-1" />
 
       <NotificationBell />
-      <LanguageSwitcher />
-      <ThemeSwitcher />
 
       <div className="hidden items-center gap-3 sm:flex">
         <Link to="/profile" className="text-right">

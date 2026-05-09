@@ -1,8 +1,6 @@
 import { Mail, Phone } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Logo, LogoMark } from '../../components/branding/Logo'
-import { LanguageSwitcher } from '../../components/layout/LanguageSwitcher'
-import { ThemeSwitcher } from '../../components/layout/ThemeSwitcher'
 
 export function AuthLayout({ title, subtitle, children, footer }) {
   const { t } = useTranslation()
@@ -28,12 +26,6 @@ export function AuthLayout({ title, subtitle, children, footer }) {
       </div>
 
       <div className="relative flex flex-col items-center justify-center bg-white px-6 py-10 dark:bg-slate-950 sm:px-10">
-        {/* top-right switchers */}
-        <div className="absolute right-4 top-4 flex items-center gap-2 sm:right-6 sm:top-6">
-          <LanguageSwitcher />
-          <ThemeSwitcher />
-        </div>
-
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center gap-3 lg:hidden">
             <div className="flex shrink-0 rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-fuchsia-600 p-2.5 shadow-md ring-1 ring-slate-900/10 dark:ring-white/20">
