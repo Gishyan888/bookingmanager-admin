@@ -1,16 +1,12 @@
 import clsx from 'clsx'
-import { format, isValid, parse } from 'date-fns'
-import { Calendar } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import flatpickr from 'flatpickr'
+import { useEffect, useMemo, useRef } from 'react'
+import 'flatpickr/dist/flatpickr.min.css'
 import { useTranslation } from 'react-i18next'
-import { pickerHtmlLang } from '../../utils/localeUi'
 
 const pad = (n) => String(n).padStart(2, '0')
 
-/** Always show & type as day-first (per product requirement). */
-const DISPLAY_FMT = 'dd/MM/yyyy HH:mm'
-
-/** `YYYY-MM-DDTHH:mm` for datetime-local and API */
+/** API wire format (local clock, no TZ suffix). */
 export function dateToLocalIso(d) {
   if (!d || Number.isNaN(d.getTime())) return ''
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
@@ -28,6 +24,8 @@ function parseIsoToDate(iso) {
       Number(m[3]),
       Number(m[4]),
       Number(m[5]),
+      0,
+      0,
     )
   }
   const dt = new Date(iso)
@@ -39,7 +37,6 @@ function parseMinToDate(minIso) {
   return parseIsoToDate(minIso)
 }
 
-/** Clamp ISO string (minutes) so it is not before minIso */
 function clampToMin(valueIso, minIso) {
   if (!valueIso) return valueIso
   const min = parseMinToDate(minIso)
@@ -50,52 +47,24 @@ function clampToMin(valueIso, minIso) {
   return valueIso.slice(0, 16)
 }
 
-/** Current local time at minute boundary (no seconds churn in min=). */
+/** Current local time at minute boundary. */
 export function localIsoMinutesNow() {
   const d = new Date()
   d.setSeconds(0, 0)
   return dateToLocalIso(d)
 }
 
-/** Parse typed dd/mm/yyyy (and ISO fallbacks). */
-function parseFlexibleDisplay(text, refBase) {
-  const t = text.trim()
-  if (!t) return null
-  const primary = parse(t, DISPLAY_FMT, refBase)
-  if (isValid(primary)) return primary
+/** Flatpickr display + parse tokens: fixed dd/mm/yyyy + 24‑hour HH:mm everywhere. */
+const FP_FORMAT = 'd/m/Y H:i'
 
-  const m = t.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/)
-  if (m) {
-    const d = new Date(
-      Number(m[1]),
-      Number(m[2]) - 1,
-      Number(m[3]),
-      Number(m[4]),
-      Number(m[5]),
-    )
-    return isValid(d) ? d : null
-  }
-
-  const slash = t.match(
-    /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/,
-  )
-  if (slash) {
-    const d = new Date(
-      Number(slash[3]),
-      Number(slash[2]) - 1,
-      Number(slash[1]),
-      Number(slash[4]),
-      Number(slash[5]),
-    )
-    return isValid(d) ? d : null
-  }
-
-  return null
+function minuteIncFromSeconds(stepSec) {
+  const m = Math.round(Number(stepSec) / 60)
+  return Number.isFinite(m) && m > 0 ? m : 15
 }
 
 /**
- * Visible value: **dd/MM/yyyy HH:mm** (24-hour). Wire value: `YYYY-MM-DDTHH:mm` for the API.
- * Hidden `datetime-local`: OS picker respects `lang`/`documentElement.lang` where possible (not all browsers).
+ * Flatpickr: strict calendar + typed input in **dd/MM/yyyy HH:mm** only, **24h**, same in every language.
+ * Emits local `YYYY-MM-DDTHH:mm` for the API.
  */
 export function DateTimePicker({
   label,
@@ -108,9 +77,14 @@ export function DateTimePicker({
   minIso,
   step = 900,
 }) {
-  const { t, i18n } = useTranslation()
-  const nativeRef = useRef(null)
-  const [textDraft, setTextDraft] = useState('')
+  const { t } = useTranslation()
+  const inputRef = useRef(null)
+  const fpRef = useRef(null)
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+  const minIsoRef = useRef(minIso)
+  minIsoRef.current = minIso
+  const displayIsoRef = useRef('')
 
   const normalizedValue = useMemo(() => {
     if (!value) return ''
@@ -122,73 +96,177 @@ export function DateTimePicker({
     () => (minIso ? clampToMin(normalizedValue || '', minIso) : normalizedValue),
     [normalizedValue, minIso],
   )
+  displayIsoRef.current = displayValue
 
-  const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
+  const minDate = useMemo(() => parseMinToDate(minIso), [minIso])
+  const minuteInc = useMemo(() => minuteIncFromSeconds(step), [step])
 
   useEffect(() => {
-    if (!minIso) return
-    if (!normalizedValue) return
+    if (!minIso || !normalizedValue) return
     const c = clampToMin(normalizedValue, minIso)
     if (c !== normalizedValue) onChangeRef.current?.(c)
   }, [minIso, normalizedValue])
 
   useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+
+    const fp = flatpickr(el, {
+      allowInput: true,
+      disableMobile: true,
+      appendTo: document.body,
+      dateFormat: FP_FORMAT,
+      enableTime: true,
+      time_24hr: true,
+      minuteIncrement: minuteInc,
+      defaultHour: 12,
+      defaultMinute: 0,
+      maxDate: undefined,
+      locale: {
+        weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      },
+      clickOpens: true,
+
+      parseDate(dateStr) {
+        if (!dateStr || dateStr.trim() === '') return null
+
+        const s = dateStr.trim()
+        const regex =
+          /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/
+        const m = s.match(regex)
+        if (!m) return null
+
+        let day = Number(m[1])
+        let month = Number(m[2])
+        const year = Number(m[3])
+        const hour = Number(m[4])
+        const minute = Number(m[5])
+
+        month -= 1
+        if (
+          year < 1000 ||
+          year > 9999 ||
+          Number.isNaN(day) ||
+          Number.isNaN(month) ||
+          Number.isNaN(hour) ||
+          Number.isNaN(minute) ||
+          month < 0 ||
+          month > 11 ||
+          hour < 0 ||
+          hour > 23 ||
+          minute < 0 ||
+          minute > 59 ||
+          minute % minuteInc !== 0
+        ) {
+          return null
+        }
+
+        const maxDay = new Date(year, month + 1, 0).getDate()
+        if (day < 1 || day > maxDay) return null
+
+        const d = new Date(year, month, day, hour, minute, 0, 0)
+        if (
+          Number.isNaN(d.getTime()) ||
+          d.getFullYear() !== year ||
+          d.getMonth() !== month ||
+          d.getDate() !== day
+        ) {
+          return null
+        }
+        return d
+      },
+
+      formatDate(date) {
+        const mm = pad(date.getMonth() + 1)
+        const dd = pad(date.getDate())
+        const yyyy = date.getFullYear()
+        const HH = pad(date.getHours())
+        const mins = pad(date.getMinutes())
+        return `${dd}/${mm}/${yyyy} ${HH}:${mins}`
+      },
+
+      onChange(selectedDates) {
+        const d = selectedDates[0]
+        if (!d) {
+          onChangeRef.current?.('')
+          return
+        }
+        let iso = dateToLocalIso(d)
+        const min = minIsoRef.current
+        if (iso && min) iso = clampToMin(iso, min)
+        onChangeRef.current?.(iso)
+      },
+
+      onClose(_dates, _s, fpInstance) {
+        const d = fpInstance.selectedDates[0]
+        const inputVal = fpInstance.input.value.trim()
+        if (!inputVal) {
+          onChangeRef.current?.('')
+          return
+        }
+        if (!d) {
+          const prev = parseIsoToDate(displayIsoRef.current)
+          fpInstance.clear()
+          if (prev) fpInstance.setDate(prev, false)
+          return
+        }
+        let iso = dateToLocalIso(d)
+        const min = minIsoRef.current
+        if (iso && min) iso = clampToMin(iso, min)
+        const fixed = iso ? parseIsoToDate(iso) : null
+        if (!fixed || !iso) return
+        if (fixed.getTime() !== d.getTime()) fpInstance.setDate(fixed, false)
+        onChangeRef.current?.(iso)
+      },
+    })
+
+    fpRef.current = fp
+
+    return () => {
+      fp.destroy()
+      fpRef.current = null
+    }
+  }, [minuteInc])
+
+  useEffect(() => {
+    const fp = fpRef.current
+    if (!fp) return
+    if (disabled) {
+      fp._input.disabled = true
+      fp.set('clickOpens', false)
+    } else {
+      fp._input.disabled = false
+      fp.set('clickOpens', true)
+    }
+  }, [disabled])
+
+  useEffect(() => {
+    const fp = fpRef.current
+    if (!fp) return
     const d = parseIsoToDate(displayValue)
-    setTextDraft(d ? format(d, DISPLAY_FMT) : '')
+    const sel = fp.selectedDates[0]
+    if (!d) {
+      if (!sel) return
+      fp.clear()
+      return
+    }
+    if (sel && sel.getTime() === d.getTime()) return
+    fp.setDate(d, false)
   }, [displayValue])
 
-  const fieldShell = clsx(
-    'flex w-full min-w-0 items-stretch overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-inset ring-slate-200 transition focus-within:ring-2 focus-within:ring-violet-500 dark:bg-slate-900 dark:ring-slate-700 dark:focus-within:ring-violet-400',
-    disabled && 'pointer-events-none opacity-60',
-  )
-
-  const applyIso = (raw) => {
-    const trimmed = raw?.slice(0, 16) ?? ''
-    if (!trimmed) {
-      onChange?.('')
-      return
+  useEffect(() => {
+    const fp = fpRef.current
+    if (!fp) return
+    fp.set('minDate', minDate ?? null)
+    const sel = fp.selectedDates[0]
+    if (sel && minDate && sel.getTime() < minDate.getTime()) {
+      fp.setDate(minDate, false)
+      onChangeRef.current?.(dateToLocalIso(minDate))
     }
-    const next = minIso ? clampToMin(trimmed, minIso) : trimmed
-    onChange?.(next)
-  }
+  }, [minDate])
 
-  const commitText = () => {
-    const raw = textDraft.trim()
-    if (!raw) {
-      onChange?.('')
-      return
-    }
-    const refBase = new Date()
-    const d = parseFlexibleDisplay(raw, refBase)
-    if (!d) {
-      const keep = parseIsoToDate(displayValue)
-      setTextDraft(keep ? format(keep, DISPLAY_FMT) : '')
-      return
-    }
-    let iso = dateToLocalIso(d)
-    if (minIso) iso = clampToMin(iso, minIso)
-    onChange?.(iso)
-  }
-
-  const openPicker = () => {
-    const el = nativeRef.current
-    if (!el || disabled) return
-    if (typeof el.showPicker === 'function') {
-      try {
-        el.showPicker()
-      } catch {
-        el.focus()
-      }
-    } else {
-      el.focus()
-    }
-  }
-
-  const minAttr =
-    minIso && String(minIso).trim() !== ''
-      ? String(minIso).slice(0, 16)
-      : undefined
+  const inputClass =
+    'block min-h-[2.75rem] w-full rounded-lg border-0 bg-white px-3 py-2 text-base shadow-sm ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 transition focus:ring-2 focus:ring-inset focus:ring-violet-500 md:min-h-0 md:text-sm dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:placeholder:text-slate-500 dark:focus:ring-violet-400 tabular-nums'
 
   return (
     <div className={clsx('block w-full min-w-0', className)}>
@@ -198,56 +276,16 @@ export function DateTimePicker({
           {required && <span className="ml-0.5 text-rose-500">*</span>}
         </span>
       )}
-      <div className={fieldShell}>
-        <button
-          type="button"
-          disabled={disabled}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={openPicker}
-          title={t('bookings.pickDateTime')}
-          aria-label={t('bookings.pickDateTime')}
-          className="flex w-11 shrink-0 cursor-pointer items-center justify-center border-0 border-r border-slate-200 bg-transparent text-slate-500 transition hover:bg-slate-50 hover:text-violet-600 disabled:cursor-not-allowed dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400"
-        >
-          <Calendar size={18} className="shrink-0" aria-hidden />
-        </button>
-        <input
-          type="text"
-          inputMode="numeric"
-          disabled={disabled}
-          required={required}
-          value={textDraft}
-          onChange={(e) => setTextDraft(e.target.value)}
-          onBlur={commitText}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault()
-              commitText()
-              e.currentTarget.blur()
-            }
-          }}
-          placeholder={t('bookings.dateTimePlaceholder')}
-          className={clsx(
-            'min-h-[2.75rem] min-w-0 flex-1 border-0 bg-transparent py-2 pr-3 pl-2 font-mono text-base tabular-nums text-slate-800 outline-none md:min-h-0 md:py-2 md:text-sm dark:text-slate-100',
-          )}
-          autoComplete="off"
-          spellCheck={false}
-          aria-required={required}
-        />
-        {/* Hidden native control: min/step + showPicker; value stays ISO */}
-        <input
-          ref={nativeRef}
-          type="datetime-local"
-          disabled={disabled}
-          step={step}
-          min={minAttr}
-          value={displayValue}
-          onChange={(e) => applyIso(e.target.value)}
-          lang={pickerHtmlLang(i18n.language)}
-          tabIndex={-1}
-          className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
-          aria-hidden
-        />
-      </div>
+      <input
+        ref={inputRef}
+        type="text"
+        placeholder={t('bookings.dateTimePlaceholder')}
+        className={inputClass}
+        autoComplete="off"
+        spellCheck={false}
+        aria-required={required}
+        readOnly={false}
+      />
       {hint && (
         <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
           {hint}

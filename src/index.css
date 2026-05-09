@@ -46,3 +46,8 @@
     transform: translateY(0);
   }
 }
+
+/* Flatpickr appends to body; lift above dialogs/drawers (Tailwind modals ~z-50). */
+.flatpickr-calendar.open {
+  z-index: 1050;
+}
