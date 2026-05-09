@@ -21,6 +21,8 @@ export const dashboard = {
 export const users = {
   me: () => api.get('/users/me').then((r) => r.data),
   updateMe: (data) => api.patch('/users/me', data).then((r) => r.data),
+  updateMyPreferences: (data) =>
+    api.patch('/users/me/preferences', data).then((r) => r.data),
   listOwners: (params) =>
     api.get('/users/owners', { params }).then((r) => r.data),
   myManagers: (params) =>
