@@ -1,13 +1,16 @@
 import clsx from 'clsx'
+import { isValid, parse } from 'date-fns'
 import { enGB, hy, ru } from 'date-fns/locale'
 import { Calendar } from 'lucide-react'
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import { useTranslation } from 'react-i18next'
 
 registerLocale('en-GB', enGB)
 registerLocale('ru', ru)
 registerLocale('hy', hy)
+
+const DATE_FNS_LOCALE = { hy, ru, 'en-GB': enGB }
 
 const pad = (n) => String(n).padStart(2, '0')
 
@@ -41,15 +44,59 @@ function localeCodeFor(lang) {
   return 'en-GB'
 }
 
+/** Try common typed formats (locale-aware where it matters). */
+function parseTypedDateTime(text, locale) {
+  if (!text?.trim()) return null
+  const t = text.trim()
+  const formats = [
+    'dd/MM/yyyy HH:mm',
+    'dd/MM/yyyy H:mm',
+    'dd.MM.yyyy HH:mm',
+    'dd.MM.yyyy H:mm',
+    "yyyy-MM-dd'T'HH:mm",
+    'yyyy-MM-dd HH:mm',
+  ]
+  for (const fmt of formats) {
+    try {
+      const d = parse(t, fmt, new Date(), { locale })
+      if (isValid(d)) return d
+    } catch {
+      // try next
+    }
+  }
+  return null
+}
+
 const CustomInput = forwardRef(function DateTimePickerInput(
-  { value, onClick, disabled },
+  { value, onClick, disabled, onManualCommit, parseLocale, onKeyDown, ...rest },
   ref,
 ) {
+  const [draft, setDraft] = useState(value ?? '')
+
+  useEffect(() => {
+    setDraft(value ?? '')
+  }, [value])
+
   const fieldClasses = clsx(
     'block w-full cursor-pointer rounded-lg border-0 bg-white py-2 pl-9 pr-3 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 md:text-sm',
     'text-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400',
     disabled && 'cursor-not-allowed opacity-60',
   )
+
+  const commitDraft = () => {
+    const trimmed = draft?.trim()
+    if (!trimmed) {
+      onManualCommit?.('')
+      return
+    }
+    const d = parseTypedDateTime(trimmed, parseLocale)
+    if (d) {
+      onManualCommit?.(toLocalIso(d))
+    } else {
+      setDraft(value ?? '')
+    }
+  }
+
   return (
     <div className="relative w-full">
       <Calendar
@@ -60,13 +107,23 @@ const CustomInput = forwardRef(function DateTimePickerInput(
       <input
         ref={ref}
         type="text"
-        readOnly
-        value={value ?? ''}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
         onClick={onClick}
+        onBlur={commitDraft}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            commitDraft()
+            e.currentTarget.blur()
+          }
+          onKeyDown?.(e)
+        }}
         disabled={disabled}
         className={fieldClasses}
         autoComplete="off"
         placeholder="dd/mm/yyyy HH:mm"
+        {...rest}
       />
     </div>
   )
@@ -75,8 +132,8 @@ const CustomInput = forwardRef(function DateTimePickerInput(
 CustomInput.displayName = 'DateTimePickerInput'
 
 /**
- * Date + time in one control (calendar + 24h time list) via `react-datepicker`.
- * Still emits local `YYYY-MM-DDTHH:mm` for the API.
+ * Date + time (calendar + time list). Emits local `YYYY-MM-DDTHH:mm` for the API.
+ * Styles load from `main.jsx` so the calendar grid is not broken by CSS `@import` order.
  */
 export function DateTimePicker({
   label,
@@ -93,6 +150,19 @@ export function DateTimePicker({
     () => localeCodeFor(i18n.language),
     [i18n.language],
   )
+  const parseLocale = DATE_FNS_LOCALE[locale] ?? enGB
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const customInput = useMemo(
+    () => (
+      <CustomInput
+        parseLocale={parseLocale}
+        onManualCommit={(iso) => onChangeRef.current?.(iso)}
+      />
+    ),
+    [parseLocale],
+  )
 
   return (
     <div className={clsx('block', className)}>
@@ -104,7 +174,7 @@ export function DateTimePicker({
       )}
       <DatePicker
         selected={selected}
-        onChange={(d) => onChange?.(toLocalIso(d))}
+        onChange={(d) => onChange?.(d ? toLocalIso(d) : '')}
         showTimeSelect
         timeFormat="HH:mm"
         timeIntervals={15}
@@ -117,7 +187,7 @@ export function DateTimePicker({
         withPortal
         calendarClassName="bm-datepicker"
         popperClassName="bm-datepicker-popper"
-        customInput={<CustomInput />}
+        customInput={customInput}
         isClearable={false}
         popperProps={{ strategy: 'fixed' }}
       />
