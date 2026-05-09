@@ -1,6 +1,5 @@
 import {
   BedDouble,
-  Building2,
   CalendarCheck,
   DollarSign,
   Users,
@@ -45,12 +44,6 @@ export function OwnerDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <StatCard
-          label={t('dashboard.hotels')}
-          value={ttl.hotels}
-          icon={Building2}
-          tone="violet"
-        />
         <StatCard
           label={t('dashboard.rooms')}
           value={ttl.rooms}
