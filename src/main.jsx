@@ -1,7 +1,5 @@
 import { createRoot } from 'react-dom/client'
 import './i18n'
-// Must load before app CSS: @import after @tailwind is invalid and can drop this stylesheet in the bundle.
-import 'react-datepicker/dist/react-datepicker.css'
 import './index.css'
 import App from './App.jsx'
 

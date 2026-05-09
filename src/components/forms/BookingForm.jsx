@@ -1,8 +1,9 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Input, Select, Textarea } from '../ui/Input'
 import { PhoneInput } from '../ui/PhoneInput'
 import { Button } from '../ui/Button'
-import { DateTimePicker } from '../ui/DateTimePicker'
+import { DateTimePicker, localIsoMinutesNow } from '../ui/DateTimePicker'
 import { computeNights, formatAMD } from '../../utils/format'
 
 const STATUS = [
@@ -54,6 +55,17 @@ export function BookingForm({
     const pad = (n) => String(n).padStart(2, '0')
     return `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}T${pad(next.getHours())}:${pad(next.getMinutes())}`
   }
+
+  /** No past dates when creating a booking (`YYYY-MM-DDTHH:mm` compares lexically). */
+  const checkInMinIso = isEdit ? undefined : localIsoMinutesNow()
+
+  const checkOutMinIso = useMemo(() => {
+    const cin = value.checkIn?.slice(0, 16)
+    if (isEdit) return cin ?? undefined
+    const now = localIsoMinutesNow()
+    if (!cin) return now
+    return cin > now ? cin : now
+  }, [value.checkIn, isEdit])
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
@@ -181,6 +193,7 @@ export function BookingForm({
         <DateTimePicker
           label={t('bookings.checkIn')}
           value={value.checkIn}
+          minIso={checkInMinIso}
           onChange={(v) =>
             onChange({
               ...value,
@@ -194,6 +207,7 @@ export function BookingForm({
         <DateTimePicker
           label={t('bookings.checkOut')}
           value={value.checkOut}
+          minIso={checkOutMinIso}
           onChange={(v) => onChange({ ...value, checkOut: v })}
           hint={t('bookings.defaultCheckOutHint')}
           required

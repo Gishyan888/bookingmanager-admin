@@ -1,18 +1,15 @@
 import clsx from 'clsx'
-import { isValid, parse } from 'date-fns'
-import { enGB, hy, ru } from 'date-fns/locale'
 import { Calendar } from 'lucide-react'
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
-import DatePicker, { registerLocale } from 'react-datepicker'
+import { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-registerLocale('en-GB', enGB)
-registerLocale('ru', ru)
-registerLocale('hy', hy)
-
-const DATE_FNS_LOCALE = { hy, ru, 'en-GB': enGB }
-
 const pad = (n) => String(n).padStart(2, '0')
+
+/** `YYYY-MM-DDTHH:mm` for datetime-local and API */
+export function dateToLocalIso(d) {
+  if (!d || Number.isNaN(d.getTime())) return ''
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 function parseIsoToDate(iso) {
   if (!iso) return null
@@ -28,115 +25,36 @@ function parseIsoToDate(iso) {
       Number(m[5]),
     )
   }
-  const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? null : d
+  const dt = new Date(iso)
+  return Number.isNaN(dt.getTime()) ? null : dt
 }
 
-function toLocalIso(d) {
-  if (!d || Number.isNaN(d.getTime())) return ''
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+function parseMinToDate(minIso) {
+  if (!minIso || String(minIso).trim() === '') return null
+  return parseIsoToDate(minIso)
 }
 
-function localeCodeFor(lang) {
-  const base = (lang || 'en').split('-')[0]
-  if (base === 'hy') return 'hy'
-  if (base === 'ru') return 'ru'
-  return 'en-GB'
+/** Clamp ISO string (minutes) so it is not before minIso */
+function clampToMin(valueIso, minIso) {
+  if (!valueIso) return valueIso
+  const min = parseMinToDate(minIso)
+  if (!min) return valueIso
+  const v = parseIsoToDate(valueIso)
+  if (!v) return valueIso
+  if (v.getTime() < min.getTime()) return dateToLocalIso(min)
+  return valueIso.slice(0, 16)
 }
 
-/** Try common typed formats (locale-aware where it matters). */
-function parseTypedDateTime(text, locale) {
-  if (!text?.trim()) return null
-  const t = text.trim()
-  const formats = [
-    'dd/MM/yyyy HH:mm',
-    'dd/MM/yyyy H:mm',
-    'dd.MM.yyyy HH:mm',
-    'dd.MM.yyyy H:mm',
-    "yyyy-MM-dd'T'HH:mm",
-    'yyyy-MM-dd HH:mm',
-  ]
-  for (const fmt of formats) {
-    try {
-      const d = parse(t, fmt, new Date(), { locale })
-      if (isValid(d)) return d
-    } catch {
-      // try next
-    }
-  }
-  return null
+/** Current local time at minute boundary (no seconds churn in min=). */
+export function localIsoMinutesNow() {
+  const d = new Date()
+  d.setSeconds(0, 0)
+  return dateToLocalIso(d)
 }
-
-const CustomInput = forwardRef(function DateTimePickerInput(
-  { value, onClick, disabled, onManualCommit, parseLocale, onKeyDown, ...rest },
-  ref,
-) {
-  const [draft, setDraft] = useState(value ?? '')
-
-  useEffect(() => {
-    setDraft(value ?? '')
-  }, [value])
-
-  const fieldClasses = clsx(
-    'block w-full min-w-0 rounded-lg border-0 bg-white py-2.5 pl-[2.85rem] pr-3 text-left text-base shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 md:py-2 md:text-sm',
-    'cursor-text text-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400',
-    disabled && 'cursor-not-allowed opacity-60',
-  )
-
-  const commitDraft = () => {
-    const trimmed = draft?.trim()
-    if (!trimmed) {
-      onManualCommit?.('')
-      return
-    }
-    const d = parseTypedDateTime(trimmed, parseLocale)
-    if (d) {
-      onManualCommit?.(toLocalIso(d))
-    } else {
-      setDraft(value ?? '')
-    }
-  }
-
-  return (
-    <div className="relative w-full min-w-0">
-      <span
-        className="pointer-events-none absolute inset-y-0 left-0 flex w-11 shrink-0 items-center justify-center text-slate-400 dark:text-slate-500"
-        aria-hidden
-      >
-        <Calendar size={16} strokeWidth={2} />
-      </span>
-      <input
-        ref={ref}
-        type="text"
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onClick={(e) => {
-          onClick?.(e)
-        }}
-        onBlur={commitDraft}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault()
-            commitDraft()
-            e.currentTarget.blur()
-          }
-          onKeyDown?.(e)
-        }}
-        disabled={disabled}
-        className={fieldClasses}
-        autoComplete="off"
-        placeholder="dd/mm/yyyy HH:mm"
-        {...rest}
-      />
-    </div>
-  )
-})
-
-CustomInput.displayName = 'DateTimePickerInput'
 
 /**
- * Date + time (calendar + time list). Emits local `YYYY-MM-DDTHH:mm` for the API.
- * Styles load from `main.jsx` so the calendar grid is not broken by CSS `@import` order.
+ * Native datetime field + explicit “Choose” (showPicker).
+ * Same wire format `YYYY-MM-DDTHH:mm` as the API.
  */
 export function DateTimePicker({
   label,
@@ -146,54 +64,108 @@ export function DateTimePicker({
   required,
   className,
   disabled,
+  minIso,
+  step = 900,
 }) {
-  const { t, i18n } = useTranslation()
-  const selected = useMemo(() => parseIsoToDate(value), [value])
-  const locale = useMemo(
-    () => localeCodeFor(i18n.language),
-    [i18n.language],
+  const { t } = useTranslation()
+  const inputRef = useRef(null)
+
+  const normalizedValue = useMemo(() => {
+    if (!value) return ''
+    const m = String(value).match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/)
+    return m ? m[1] : String(value).slice(0, 16)
+  }, [value])
+
+  const displayValue = useMemo(
+    () => (minIso ? clampToMin(normalizedValue || '', minIso) : normalizedValue),
+    [normalizedValue, minIso],
   )
-  const parseLocale = DATE_FNS_LOCALE[locale] ?? enGB
+
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
 
-  const customInput = useMemo(
-    () => (
-      <CustomInput
-        parseLocale={parseLocale}
-        onManualCommit={(iso) => onChangeRef.current?.(iso)}
-      />
-    ),
-    [parseLocale],
+  useEffect(() => {
+    if (!minIso) return
+    if (!normalizedValue) return
+    const c = clampToMin(normalizedValue, minIso)
+    if (c !== normalizedValue) onChangeRef.current?.(c)
+  }, [minIso, normalizedValue])
+
+  const fieldShell = clsx(
+    'flex w-full min-w-0 items-stretch overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-inset ring-slate-200 transition focus-within:ring-2 focus-within:ring-violet-500 dark:bg-slate-900 dark:ring-slate-700 dark:focus-within:ring-violet-400',
+    disabled && 'pointer-events-none opacity-60',
   )
 
+  const apply = (raw) => {
+    const trimmed = raw?.slice(0, 16) ?? ''
+    if (!trimmed) {
+      onChange?.('')
+      return
+    }
+    const next = minIso ? clampToMin(trimmed, minIso) : trimmed
+    onChange?.(next)
+  }
+
+  const openPicker = () => {
+    const el = inputRef.current
+    if (!el || disabled) return
+    if (typeof el.showPicker === 'function') {
+      try {
+        el.showPicker()
+      } catch {
+        el.focus()
+      }
+    } else {
+      el.focus()
+    }
+  }
+
+  const minAttr =
+    minIso && String(minIso).trim() !== ''
+      ? String(minIso).slice(0, 16)
+      : undefined
+
   return (
-    <div className={clsx('block w-full [&_.react-datepicker-wrapper]:block [&_.react-datepicker-wrapper]:w-full', className)}>
+    <div className={clsx('block w-full min-w-0', className)}>
       {label && (
         <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
           {label}
           {required && <span className="ml-0.5 text-rose-500">*</span>}
         </span>
       )}
-      <DatePicker
-        selected={selected}
-        onChange={(d) => onChange?.(d ? toLocalIso(d) : '')}
-        showTimeSelect
-        timeFormat="HH:mm"
-        timeIntervals={15}
-        dateFormat="dd/MM/yyyy HH:mm"
-        timeCaption={t('common.time')}
-        locale={locale}
-        shouldCloseOnSelect={false}
-        disabled={disabled}
-        showPopperArrow={false}
-        withPortal
-        calendarClassName="bm-datepicker"
-        popperClassName="bm-datepicker-popper"
-        customInput={customInput}
-        isClearable={false}
-        popperProps={{ strategy: 'fixed' }}
-      />
+      <div className={fieldShell}>
+        <input
+          ref={inputRef}
+          type="datetime-local"
+          disabled={disabled}
+          required={required}
+          step={step}
+          min={minAttr}
+          value={displayValue}
+          onChange={(e) => apply(e.target.value)}
+          className={clsx(
+            'min-h-[2.75rem] min-w-0 flex-1 border-0 bg-transparent py-2 pl-3 pr-2 text-base text-slate-800 outline-none md:min-h-0 md:py-2 md:text-sm dark:text-slate-100',
+            '[color-scheme:light] dark:[color-scheme:dark]',
+          )}
+          autoComplete="off"
+          aria-required={required}
+        />
+        <button
+          type="button"
+          disabled={disabled}
+          onMouseDown={(e) => {
+            /* keep focus chain for showPicker without stealing from input oddly */
+            e.preventDefault()
+          }}
+          onClick={openPicker}
+          title={t('bookings.pickDateTime')}
+          aria-label={t('bookings.pickDateTime')}
+          className="inline-flex shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 border-l border-slate-200 px-3 py-2 text-[10px] font-semibold uppercase leading-tight tracking-wide text-violet-700 transition hover:bg-violet-50 sm:flex-row sm:gap-2 sm:text-xs dark:border-slate-700 dark:text-violet-300 dark:hover:bg-violet-500/15"
+        >
+          <Calendar size={18} className="shrink-0" aria-hidden />
+          <span>{t('bookings.pickDateTimeBtn')}</span>
+        </button>
+      </div>
       {hint && (
         <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
           {hint}

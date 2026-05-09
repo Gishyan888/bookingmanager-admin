@@ -260,6 +260,8 @@
     "checkOut": "Check-out",
     "defaultCheckInHint": "Default arrival 14:00",
     "defaultCheckOutHint": "Default departure 12:00",
+    "pickDateTime": "Open date & time picker",
+    "pickDateTimeBtn": "Choose",
     "computedTotal": "Total",
     "pickDates": "Pick check-in and check-out to see the total.",
     "nightsCalc": "{{nights}} night(s) × {{rate}}",
