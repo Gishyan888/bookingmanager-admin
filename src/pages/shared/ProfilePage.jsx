@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Globe, Palette } from 'lucide-react'
+import { Globe, Monitor, Moon, Palette, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { users } from '../../api/endpoints'
 import { Button } from '../../components/ui/Button'
-import { Input, Select } from '../../components/ui/Input'
+import { Input } from '../../components/ui/Input'
 import { PhoneInput, phoneForSubmit } from '../../components/ui/PhoneInput'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { useAuth } from '../../context/AuthContext'
@@ -25,6 +25,12 @@ export function ProfilePage() {
     preferredLanguage: 'hy',
     preferredTheme: 'light',
   })
+
+  const themeItems = [
+    { id: 'light', label: t('common.themeLight'), icon: Sun },
+    { id: 'dark', label: t('common.themeDark'), icon: Moon },
+    { id: 'system', label: t('common.themeSystem'), icon: Monitor },
+  ]
 
   useEffect(() => {
     users
@@ -129,22 +135,42 @@ export function ProfilePage() {
 
             <div className="space-y-4 lg:col-span-4">
               <div className="rounded-2xl border border-violet-100 bg-linear-to-br from-violet-50 to-white p-5 shadow-sm ring-1 ring-violet-100 dark:border-violet-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-violet-900/50">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  <Globe size={16} className="text-violet-600 dark:text-violet-300" />
-                  <span>{t('common.language')}</span>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <Globe size={16} className="text-violet-600 dark:text-violet-300" />
+                    <span>{t('common.language')}</span>
+                  </div>
+                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold uppercase text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
+                    {form.preferredLanguage}
+                  </span>
                 </div>
-                <Select
-                  value={form.preferredLanguage}
-                  onChange={(e) =>
-                    setForm({ ...form, preferredLanguage: e.target.value })
-                  }
-                >
-                  {SUPPORTED_LANGS.map((l) => (
-                    <option key={l.code} value={l.code}>
-                      {l.native}
-                    </option>
-                  ))}
-                </Select>
+                <div className="space-y-2">
+                  {SUPPORTED_LANGS.map((l) => {
+                    const active = form.preferredLanguage === l.code
+                    return (
+                      <button
+                        key={l.code}
+                        type="button"
+                        onClick={() =>
+                          setForm({ ...form, preferredLanguage: l.code })
+                        }
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
+                          active
+                            ? 'bg-violet-100 text-violet-800 ring-1 ring-violet-200 dark:bg-violet-500/20 dark:text-violet-200 dark:ring-violet-500/30'
+                            : 'bg-white/80 text-slate-700 ring-1 ring-slate-200 hover:bg-violet-50 dark:bg-slate-900/60 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-base leading-none">{l.flag}</span>
+                          <span>{l.native}</span>
+                        </span>
+                        {active && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
                 <div className="mt-3 flex justify-end">
                   <Button type="button" loading={busyLanguage} onClick={saveLanguage}>
                     {t('common.saveChanges')}
@@ -153,20 +179,42 @@ export function ProfilePage() {
               </div>
 
               <div className="rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-5 shadow-sm ring-1 ring-indigo-100 dark:border-indigo-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-indigo-900/50">
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  <Palette size={16} className="text-indigo-600 dark:text-indigo-300" />
-                  <span>{t('common.theme')}</span>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    <Palette size={16} className="text-indigo-600 dark:text-indigo-300" />
+                    <span>{t('common.theme')}</span>
+                  </div>
+                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-semibold uppercase text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+                    {form.preferredTheme}
+                  </span>
                 </div>
-                <Select
-                  value={form.preferredTheme}
-                  onChange={(e) =>
-                    setForm({ ...form, preferredTheme: e.target.value })
-                  }
-                >
-                  <option value="light">{t('common.themeLight')}</option>
-                  <option value="dark">{t('common.themeDark')}</option>
-                  <option value="system">{t('common.themeSystem')}</option>
-                </Select>
+                <div className="space-y-2">
+                  {themeItems.map((it) => {
+                    const active = form.preferredTheme === it.id
+                    return (
+                      <button
+                        key={it.id}
+                        type="button"
+                        onClick={() =>
+                          setForm({ ...form, preferredTheme: it.id })
+                        }
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition ${
+                          active
+                            ? 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-200 dark:ring-indigo-500/30'
+                            : 'bg-white/80 text-slate-700 ring-1 ring-slate-200 hover:bg-indigo-50 dark:bg-slate-900/60 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <it.icon size={14} />
+                          <span>{it.label}</span>
+                        </span>
+                        {active && (
+                          <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
                 <div className="mt-3 flex justify-end">
                   <Button type="button" loading={busyTheme} onClick={saveTheme}>
                     {t('common.saveChanges')}
