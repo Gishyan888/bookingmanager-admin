@@ -78,8 +78,8 @@ const CustomInput = forwardRef(function DateTimePickerInput(
   }, [value])
 
   const fieldClasses = clsx(
-    'block w-full cursor-pointer rounded-lg border-0 bg-white py-2 pl-9 pr-3 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 md:text-sm',
-    'text-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400',
+    'block w-full min-w-0 rounded-lg border-0 bg-white py-2.5 pl-[2.85rem] pr-3 text-left text-base shadow-sm ring-1 ring-inset ring-slate-200 transition placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-violet-500 md:py-2 md:text-sm',
+    'cursor-text text-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400',
     disabled && 'cursor-not-allowed opacity-60',
   )
 
@@ -98,18 +98,21 @@ const CustomInput = forwardRef(function DateTimePickerInput(
   }
 
   return (
-    <div className="relative w-full">
-      <Calendar
-        size={15}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+    <div className="relative w-full min-w-0">
+      <span
+        className="pointer-events-none absolute inset-y-0 left-0 flex w-11 shrink-0 items-center justify-center text-slate-400 dark:text-slate-500"
         aria-hidden
-      />
+      >
+        <Calendar size={16} strokeWidth={2} />
+      </span>
       <input
         ref={ref}
         type="text"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        onClick={onClick}
+        onClick={(e) => {
+          onClick?.(e)
+        }}
         onBlur={commitDraft}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
@@ -165,7 +168,7 @@ export function DateTimePicker({
   )
 
   return (
-    <div className={clsx('block', className)}>
+    <div className={clsx('block w-full [&_.react-datepicker-wrapper]:block [&_.react-datepicker-wrapper]:w-full', className)}>
       {label && (
         <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
           {label}

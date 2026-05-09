@@ -47,6 +47,12 @@
   }
 }
 
+/* Full-width field — default wrapper is inline-block and shrinks/clips text beside icons */
+.react-datepicker-wrapper {
+  display: block;
+  width: 100%;
+}
+
 /* react-datepicker — ensure layout when parent is flex (portal); floats still apply inside this box */
 .react-datepicker__portal .react-datepicker {
   display: inline-block;
