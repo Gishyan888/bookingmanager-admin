@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Toaster } from 'react-hot-toast'
 import { Navigate, Route, BrowserRouter, Routes } from 'react-router-dom'
@@ -25,6 +26,7 @@ import { ProfilePage } from './pages/shared/ProfilePage'
 import { RoomsPage } from './pages/shared/RoomsPage'
 import { PageLoader } from './components/ui/PageLoader'
 import { RedirectIfAuthed, RequireAuth } from './routes/RequireAuth'
+import { pickerHtmlLang } from './utils/localeUi'
 
 function RootRedirect() {
   const { user, loading } = useAuth()
@@ -54,6 +56,23 @@ function NotFound() {
   )
 }
 
+function SyncDocumentLang() {
+  const { i18n } = useTranslation()
+
+  useEffect(() => {
+    const apply = () => {
+      document.documentElement.lang = pickerHtmlLang(i18n.resolvedLanguage)
+    }
+    apply()
+    i18n.on('languageChanged', apply)
+    return () => {
+      i18n.off('languageChanged', apply)
+    }
+  }, [i18n])
+
+  return null
+}
+
 function ToasterAdapter() {
   const { resolved } = useTheme()
   const dark = resolved === 'dark'
@@ -77,6 +96,7 @@ function ToasterAdapter() {
 export default function App() {
   return (
     <BrowserRouter>
+      <SyncDocumentLang />
       <ThemeProvider>
         <ApiLoadingProvider>
           <AuthProvider>

@@ -262,6 +262,7 @@
     "defaultCheckOutHint": "Կանխադրված ելք՝ 12:00",
     "pickDateTime": "Բացել ամսաթվի և ժամի ընտրիչը",
     "pickDateTimeBtn": "Ընտրել",
+    "dateTimePlaceholder": "dd/mm/yyyy HH:mm",
     "computedTotal": "Ընդհանուր",
     "pickDates": "Ընտրեք մուտք/ելք՝ գումարը տեսնելու համար։",
     "nightsCalc": "{{nights}} գիշեր × {{rate}}",

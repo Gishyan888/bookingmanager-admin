@@ -262,6 +262,7 @@
     "defaultCheckOutHint": "По умолчанию выезд в 12:00",
     "pickDateTime": "Открыть календарь и время",
     "pickDateTimeBtn": "Выбрать",
+    "dateTimePlaceholder": "dd/mm/yyyy HH:mm",
     "computedTotal": "Итого",
     "pickDates": "Выберите даты, чтобы увидеть сумму.",
     "nightsCalc": "{{nights}} ноч. × {{rate}}",

@@ -1,9 +1,14 @@
 import clsx from 'clsx'
+import { format, isValid, parse } from 'date-fns'
 import { Calendar } from 'lucide-react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { pickerHtmlLang } from '../../utils/localeUi'
 
 const pad = (n) => String(n).padStart(2, '0')
+
+/** Always show & type as day-first (per product requirement). */
+const DISPLAY_FMT = 'dd/MM/yyyy HH:mm'
 
 /** `YYYY-MM-DDTHH:mm` for datetime-local and API */
 export function dateToLocalIso(d) {
@@ -52,9 +57,45 @@ export function localIsoMinutesNow() {
   return dateToLocalIso(d)
 }
 
+/** Parse typed dd/mm/yyyy (and ISO fallbacks). */
+function parseFlexibleDisplay(text, refBase) {
+  const t = text.trim()
+  if (!t) return null
+  const primary = parse(t, DISPLAY_FMT, refBase)
+  if (isValid(primary)) return primary
+
+  const m = t.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/)
+  if (m) {
+    const d = new Date(
+      Number(m[1]),
+      Number(m[2]) - 1,
+      Number(m[3]),
+      Number(m[4]),
+      Number(m[5]),
+    )
+    return isValid(d) ? d : null
+  }
+
+  const slash = t.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/,
+  )
+  if (slash) {
+    const d = new Date(
+      Number(slash[3]),
+      Number(slash[2]) - 1,
+      Number(slash[1]),
+      Number(slash[4]),
+      Number(slash[5]),
+    )
+    return isValid(d) ? d : null
+  }
+
+  return null
+}
+
 /**
- * Native datetime field + explicit “Choose” (showPicker).
- * Same wire format `YYYY-MM-DDTHH:mm` as the API.
+ * Visible value: **dd/MM/yyyy HH:mm** (24-hour). Wire value: `YYYY-MM-DDTHH:mm` for the API.
+ * Hidden `datetime-local`: OS picker respects `lang`/`documentElement.lang` where possible (not all browsers).
  */
 export function DateTimePicker({
   label,
@@ -67,8 +108,9 @@ export function DateTimePicker({
   minIso,
   step = 900,
 }) {
-  const { t } = useTranslation()
-  const inputRef = useRef(null)
+  const { t, i18n } = useTranslation()
+  const nativeRef = useRef(null)
+  const [textDraft, setTextDraft] = useState('')
 
   const normalizedValue = useMemo(() => {
     if (!value) return ''
@@ -91,12 +133,17 @@ export function DateTimePicker({
     if (c !== normalizedValue) onChangeRef.current?.(c)
   }, [minIso, normalizedValue])
 
+  useEffect(() => {
+    const d = parseIsoToDate(displayValue)
+    setTextDraft(d ? format(d, DISPLAY_FMT) : '')
+  }, [displayValue])
+
   const fieldShell = clsx(
     'flex w-full min-w-0 items-stretch overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-inset ring-slate-200 transition focus-within:ring-2 focus-within:ring-violet-500 dark:bg-slate-900 dark:ring-slate-700 dark:focus-within:ring-violet-400',
     disabled && 'pointer-events-none opacity-60',
   )
 
-  const apply = (raw) => {
+  const applyIso = (raw) => {
     const trimmed = raw?.slice(0, 16) ?? ''
     if (!trimmed) {
       onChange?.('')
@@ -106,8 +153,26 @@ export function DateTimePicker({
     onChange?.(next)
   }
 
+  const commitText = () => {
+    const raw = textDraft.trim()
+    if (!raw) {
+      onChange?.('')
+      return
+    }
+    const refBase = new Date()
+    const d = parseFlexibleDisplay(raw, refBase)
+    if (!d) {
+      const keep = parseIsoToDate(displayValue)
+      setTextDraft(keep ? format(keep, DISPLAY_FMT) : '')
+      return
+    }
+    let iso = dateToLocalIso(d)
+    if (minIso) iso = clampToMin(iso, minIso)
+    onChange?.(iso)
+  }
+
   const openPicker = () => {
-    const el = inputRef.current
+    const el = nativeRef.current
     if (!el || disabled) return
     if (typeof el.showPicker === 'function') {
       try {
@@ -134,37 +199,54 @@ export function DateTimePicker({
         </span>
       )}
       <div className={fieldShell}>
-        <input
-          ref={inputRef}
-          type="datetime-local"
-          disabled={disabled}
-          required={required}
-          step={step}
-          min={minAttr}
-          value={displayValue}
-          onChange={(e) => apply(e.target.value)}
-          className={clsx(
-            'min-h-[2.75rem] min-w-0 flex-1 border-0 bg-transparent py-2 pl-3 pr-2 text-base text-slate-800 outline-none md:min-h-0 md:py-2 md:text-sm dark:text-slate-100',
-            '[color-scheme:light] dark:[color-scheme:dark]',
-          )}
-          autoComplete="off"
-          aria-required={required}
-        />
         <button
           type="button"
           disabled={disabled}
-          onMouseDown={(e) => {
-            /* keep focus chain for showPicker without stealing from input oddly */
-            e.preventDefault()
-          }}
+          onMouseDown={(e) => e.preventDefault()}
           onClick={openPicker}
           title={t('bookings.pickDateTime')}
           aria-label={t('bookings.pickDateTime')}
-          className="inline-flex shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 border-l border-slate-200 px-3 py-2 text-[10px] font-semibold uppercase leading-tight tracking-wide text-violet-700 transition hover:bg-violet-50 sm:flex-row sm:gap-2 sm:text-xs dark:border-slate-700 dark:text-violet-300 dark:hover:bg-violet-500/15"
+          className="flex w-11 shrink-0 cursor-pointer items-center justify-center border-0 border-r border-slate-200 bg-transparent text-slate-500 transition hover:bg-slate-50 hover:text-violet-600 disabled:cursor-not-allowed dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-violet-400"
         >
           <Calendar size={18} className="shrink-0" aria-hidden />
-          <span>{t('bookings.pickDateTimeBtn')}</span>
         </button>
+        <input
+          type="text"
+          inputMode="numeric"
+          disabled={disabled}
+          required={required}
+          value={textDraft}
+          onChange={(e) => setTextDraft(e.target.value)}
+          onBlur={commitText}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              commitText()
+              e.currentTarget.blur()
+            }
+          }}
+          placeholder={t('bookings.dateTimePlaceholder')}
+          className={clsx(
+            'min-h-[2.75rem] min-w-0 flex-1 border-0 bg-transparent py-2 pr-3 pl-2 font-mono text-base tabular-nums text-slate-800 outline-none md:min-h-0 md:py-2 md:text-sm dark:text-slate-100',
+          )}
+          autoComplete="off"
+          spellCheck={false}
+          aria-required={required}
+        />
+        {/* Hidden native control: min/step + showPicker; value stays ISO */}
+        <input
+          ref={nativeRef}
+          type="datetime-local"
+          disabled={disabled}
+          step={step}
+          min={minAttr}
+          value={displayValue}
+          onChange={(e) => applyIso(e.target.value)}
+          lang={pickerHtmlLang(i18n.language)}
+          tabIndex={-1}
+          className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden opacity-0"
+          aria-hidden
+        />
       </div>
       {hint && (
         <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
