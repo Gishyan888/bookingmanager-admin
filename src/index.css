@@ -51,3 +51,15 @@
 .flatpickr-calendar.open {
   z-index: 1050;
 }
+
+/* Short viewports / mobile: full calendar + time row must stay reachable (scroll inside popup). */
+@media (max-width: 767px) {
+  .flatpickr-calendar.open {
+    max-height: min(32rem, 85vh);
+    max-height: min(32rem, 85dvh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    width: min(calc(100vw - 1.25rem), 21rem);
+  }
+}

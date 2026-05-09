@@ -119,10 +119,21 @@ export function DateTimePicker({
       enableTime: true,
       time_24hr: true,
       minuteIncrement: minuteInc,
+      closeOnSelect: false,
       defaultHour: 12,
       defaultMinute: 0,
       maxDate: undefined,
       clickOpens: true,
+
+      onOpen(_dates, _s, instance) {
+        requestAnimationFrame(() => {
+          instance.calendarContainer?.scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest',
+            behavior: 'smooth',
+          })
+        })
+      },
 
       parseDate(dateStr) {
         if (!dateStr || dateStr.trim() === '') return null
@@ -152,8 +163,7 @@ export function DateTimePicker({
           hour < 0 ||
           hour > 23 ||
           minute < 0 ||
-          minute > 59 ||
-          minute % minuteInc !== 0
+          minute > 59
         ) {
           return null
         }
