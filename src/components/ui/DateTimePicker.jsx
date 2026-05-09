@@ -122,9 +122,6 @@ export function DateTimePicker({
       defaultHour: 12,
       defaultMinute: 0,
       maxDate: undefined,
-      locale: {
-        weekdays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      },
       clickOpens: true,
 
       parseDate(dateStr) {
@@ -223,19 +220,20 @@ export function DateTimePicker({
     fpRef.current = fp
 
     return () => {
-      fp.destroy()
+      if (typeof fp?.destroy === 'function') fp.destroy()
       fpRef.current = null
     }
   }, [minuteInc])
 
   useEffect(() => {
     const fp = fpRef.current
-    if (!fp) return
+    const inputEl = fp?.input ?? fp?._input
+    if (!fp || !inputEl) return
     if (disabled) {
-      fp._input.disabled = true
+      inputEl.disabled = true
       fp.set('clickOpens', false)
     } else {
-      fp._input.disabled = false
+      inputEl.disabled = false
       fp.set('clickOpens', true)
     }
   }, [disabled])
