@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   buildYmd,
@@ -42,6 +42,8 @@ function InlineDmyPick({
   ymd,
   minYmd,
   onChangeYmd,
+  allowedYmdSet,
+  emptyMonthHint,
 }) {
   const now = new Date()
   const nowY = now.getFullYear()
@@ -63,9 +65,48 @@ function InlineDmyPick({
   const yearLow = Math.min(nowY - 2, y)
   const yearHigh = Math.max(nowY + 8, y, floor?.y ?? y)
 
+  const visibleDays = useMemo(() => {
+    const n = daysInCalendarMonth(y, mo)
+    const list = []
+    for (let dv = 1; dv <= n; dv++) {
+      const cand = buildYmd(y, mo, dv)
+      if (minYmd && ymdBefore(cand, minYmd)) continue
+      if (
+        allowedYmdSet &&
+        allowedYmdSet.size > 0 &&
+        !allowedYmdSet.has(cand)
+      ) {
+        continue
+      }
+      list.push(dv)
+    }
+    return list
+  }, [y, mo, minYmd, allowedYmdSet])
+
   const emit = (py, pm, pd) => {
     const dc = clampDayInMonth(py, pm, pd)
     onChangeYmd(buildYmd(py, pm, dc))
+  }
+
+  useEffect(() => {
+    if (!allowedYmdSet || allowedYmdSet.size === 0) return
+    if (!visibleDays.length) return
+    if (!visibleDays.includes(d)) {
+      emit(y, mo, visibleDays[0])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- emit uses latest onChangeYmd
+  }, [allowedYmdSet, y, mo, d, visibleDays])
+
+  if (
+    allowedYmdSet &&
+    allowedYmdSet.size > 0 &&
+    visibleDays.length === 0
+  ) {
+    return (
+      <p className="rounded-md bg-amber-50 px-2 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+        {emptyMonthHint || '—'}
+      </p>
+    )
   }
 
   return (
@@ -82,6 +123,7 @@ function InlineDmyPick({
       >
         {[...Array(daysInCalendarMonth(y, mo))].map((_, i) => {
           const dv = i + 1
+          if (!visibleDays.includes(dv)) return null
           const dis = dayOptionDisabled(dv, y, mo, minYmd)
           return (
             <option key={dv} value={String(dv).padStart(2, '0')} disabled={dis}>
@@ -136,8 +178,34 @@ function InlineDmyPick({
   )
 }
 
-/** 24-hour **hour : minute** dropdowns (no AM/PM). */
-function InlineHmPick({ hm, minHm, onChangeHm }) {
+/** 24-hour **hour : minute** dropdowns (no AM/PM), or a single list when `allowedHmList` is set. */
+function InlineHmPick({ hm, minHm, onChangeHm, allowedHmList, noTimesLabel }) {
+  if (allowedHmList != null) {
+    if (allowedHmList.length === 0) {
+      return (
+        <p className="rounded-md bg-amber-50 px-2 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          {noTimesLabel || '—'}
+        </p>
+      )
+    }
+    const safe = allowedHmList.includes(hm) ? hm : allowedHmList[0]
+    return (
+      <select
+        className={`${pickerInputClass} col-span-2`}
+        aria-label="Time (24h)"
+        required
+        value={safe}
+        onChange={(e) => onChangeHm(e.target.value)}
+      >
+        {allowedHmList.map((lab) => (
+          <option key={lab} value={lab}>
+            {lab}
+          </option>
+        ))}
+      </select>
+    )
+  }
+
   const { h, mi } = hmSplit(hm || '00:00')
   const mh = minHm ? hmSplit(minHm) : null
 
@@ -220,6 +288,7 @@ export function BookingForm({
   onCancel,
   busy,
   isEdit,
+  availability,
 }) {
   const { t } = useTranslation()
 
@@ -273,6 +342,35 @@ export function BookingForm({
   const todayParts = !isEdit ? splitLocalIso(localIsoMinutesNow()) : { date: '', time: '' }
   const { date: inDateStr, time: inTimeStr } = splitLocalIso(value.checkIn)
   const { date: outDateStr, time: outTimeStr } = splitLocalIso(value.checkOut)
+
+  const checkInDateAllowSet = useMemo(() => {
+    if (isEdit || availability?.checkInDates == null) return null
+    return new Set(availability.checkInDates)
+  }, [isEdit, availability?.checkInDates])
+
+  const checkOutDateAllowSet = useMemo(() => {
+    if (isEdit || availability?.checkOutDates == null) return null
+    return new Set(availability.checkOutDates)
+  }, [isEdit, availability?.checkOutDates])
+
+  const checkInHmList = useMemo(() => {
+    if (isEdit || availability?.checkInTimes == null) return null
+    return availability.checkInTimes
+  }, [isEdit, availability?.checkInTimes])
+
+  const checkOutHmList = useMemo(() => {
+    if (
+      isEdit ||
+      availability?.checkOutTimes == null ||
+      !outDateStr
+    ) {
+      return null
+    }
+    const pref = `${outDateStr}T`
+    return availability.checkOutTimes
+      .filter((s) => s.startsWith(pref))
+      .map((s) => s.slice(11, 16))
+  }, [isEdit, availability?.checkOutTimes, outDateStr])
 
   const checkInDateMin = !isEdit ? todayParts.date : undefined
   const checkInTimeMin =
@@ -431,6 +529,20 @@ export function BookingForm({
         <p className="mb-2 text-[11px] text-slate-500 dark:text-slate-400">
           {t('bookings.dateFormatHint')}
         </p>
+        {!isEdit && value.roomId && availability?.loading ? (
+          <p className="mb-2 text-xs text-violet-700 dark:text-violet-300">
+            {t('bookings.availabilityLoading')}
+          </p>
+        ) : null}
+        {!isEdit &&
+        value.roomId &&
+        !availability?.loading &&
+        availability?.checkInDates !== null &&
+        availability.checkInDates.length === 0 ? (
+          <p className="mb-2 text-xs text-amber-800 dark:text-amber-100">
+            {t('bookings.noAvailabilityInRange')}
+          </p>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
@@ -444,6 +556,8 @@ export function BookingForm({
               <InlineDmyPick
                 ymd={inDateStr}
                 minYmd={checkInDateMin}
+                allowedYmdSet={checkInDateAllowSet ?? undefined}
+                emptyMonthHint={t('bookings.noDaysThisMonth')}
                 onChangeYmd={(nextYmd) => {
                   const tm = splitLocalIso(value.checkIn).time || '14:00'
                   let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
@@ -469,6 +583,10 @@ export function BookingForm({
               <InlineHmPick
                 hm={inTimeStr || '14:00'}
                 minHm={checkInTimeMin}
+                allowedHmList={
+                  checkInHmList != null ? checkInHmList : undefined
+                }
+                noTimesLabel={t('bookings.noTimesThisDay')}
                 onChangeHm={(nextHm) => {
                   const d = splitLocalIso(value.checkIn).date
                   let iso = d ? joinLocalIso(d, nextHm) : ''
@@ -504,6 +622,8 @@ export function BookingForm({
               <InlineDmyPick
                 ymd={outDateStr}
                 minYmd={checkoutMinDay}
+                allowedYmdSet={checkOutDateAllowSet ?? undefined}
+                emptyMonthHint={t('bookings.noDaysThisMonth')}
                 onChangeYmd={(nextYmd) => {
                   const tm = splitLocalIso(value.checkOut).time || '12:00'
                   let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
@@ -521,6 +641,10 @@ export function BookingForm({
               <InlineHmPick
                 hm={outTimeStr || '12:00'}
                 minHm={checkOutTimeMin}
+                allowedHmList={
+                  checkOutHmList != null ? checkOutHmList : undefined
+                }
+                noTimesLabel={t('bookings.noTimesThisDay')}
                 onChangeHm={(nextHm) => {
                   const d = splitLocalIso(value.checkOut).date
                   let iso = d ? joinLocalIso(d, nextHm) : ''

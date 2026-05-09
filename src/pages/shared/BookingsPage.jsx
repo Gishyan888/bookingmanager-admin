@@ -44,6 +44,13 @@ export function BookingsPage() {
   const [confirmId, setConfirmId] = useState(null)
   const [roomList, setRoomList] = useState([])
   const [customerList, setCustomerList] = useState([])
+  const [bookingAvail, setBookingAvail] = useState({
+    loading: false,
+    checkInDates: null,
+    checkInTimes: null,
+    checkOutTimes: null,
+    checkOutDates: null,
+  })
 
   const load = async () => {
     setLoading(true)
@@ -70,6 +77,126 @@ export function BookingsPage() {
   useEffect(() => {
     loadOptions()
   }, [])
+
+  const closeBookingModal = () => {
+    setOpenForm(false)
+    setBookingAvail({
+      loading: false,
+      checkInDates: null,
+      checkInTimes: null,
+      checkOutTimes: null,
+      checkOutDates: null,
+    })
+  }
+
+  useEffect(() => {
+    if (!openForm || editing?.id || !editing?.roomId) {
+      setBookingAvail({
+        loading: false,
+        checkInDates: null,
+        checkInTimes: null,
+        checkOutTimes: null,
+        checkOutDates: null,
+      })
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      setBookingAvail((a) => ({ ...a, loading: true }))
+      try {
+        const from = new Date()
+        const to = new Date()
+        to.setDate(to.getDate() + 370)
+        const fromStr = `${from.getFullYear()}-${pad(from.getMonth() + 1)}-${pad(from.getDate())}`
+        const toStr = `${to.getFullYear()}-${pad(to.getMonth() + 1)}-${pad(to.getDate())}`
+        const cal = await rooms.availability(editing.roomId, {
+          from: fromStr,
+          to: toStr,
+        })
+        if (!cancelled) {
+          setBookingAvail({
+            loading: false,
+            checkInDates: cal.availableCheckInDates ?? [],
+            checkInTimes: null,
+            checkOutTimes: null,
+            checkOutDates: null,
+          })
+        }
+      } catch {
+        if (!cancelled) {
+          setBookingAvail({
+            loading: false,
+            checkInDates: null,
+            checkInTimes: null,
+            checkOutTimes: null,
+            checkOutDates: null,
+          })
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [openForm, editing?.id, editing?.roomId])
+
+  useEffect(() => {
+    if (!openForm || editing?.id || !editing?.roomId || !editing?.checkIn) {
+      return
+    }
+    const inDate = editing.checkIn.slice(0, 10)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(inDate)) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const r = await rooms.availabilityCheckInTimes(editing.roomId, {
+          date: inDate,
+          onlyFuture: true,
+        })
+        if (!cancelled) {
+          setBookingAvail((a) => ({ ...a, checkInTimes: r.checkInTimes ?? [] }))
+        }
+      } catch {
+        if (!cancelled) {
+          setBookingAvail((a) => ({ ...a, checkInTimes: null }))
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [openForm, editing?.id, editing?.roomId, editing?.checkIn])
+
+  useEffect(() => {
+    if (!openForm || editing?.id || !editing?.roomId || !editing?.checkIn) {
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const r = await rooms.availabilityCheckOutTimes(editing.roomId, {
+          checkIn: editing.checkIn,
+        })
+        if (!cancelled) {
+          setBookingAvail((a) => ({
+            ...a,
+            checkOutTimes: r.checkOutTimes ?? [],
+            checkOutDates: r.availableCheckOutDates ?? [],
+          }))
+        }
+      } catch {
+        if (!cancelled) {
+          setBookingAvail((a) => ({
+            ...a,
+            checkOutTimes: null,
+            checkOutDates: null,
+          }))
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [openForm, editing?.id, editing?.roomId, editing?.checkIn])
 
   const openCreate = () => {
     // Hotel-style defaults: arrive today at 14:00, depart tomorrow at 12:00.
@@ -165,7 +292,7 @@ export function BookingsPage() {
         toast.success(t('bookings.createdToast'))
         loadOptions()
       }
-      setOpenForm(false)
+      closeBookingModal()
       load()
     } finally {
       setBusy(false)
@@ -344,7 +471,7 @@ export function BookingsPage() {
 
       <Modal
         open={openForm}
-        onClose={() => setOpenForm(false)}
+        onClose={closeBookingModal}
         title={editing?.id ? t('bookings.editBooking') : t('bookings.newBooking')}
         size="xl"
       >
@@ -357,7 +484,18 @@ export function BookingsPage() {
             busy={busy}
             onChange={setEditing}
             onSubmit={submit}
-            onCancel={() => setOpenForm(false)}
+            onCancel={closeBookingModal}
+            availability={
+              editing.id
+                ? undefined
+                : {
+                    loading: bookingAvail.loading,
+                    checkInDates: bookingAvail.checkInDates,
+                    checkInTimes: bookingAvail.checkInTimes,
+                    checkOutTimes: bookingAvail.checkOutTimes,
+                    checkOutDates: bookingAvail.checkOutDates,
+                  }
+            }
           />
         )}
       </Modal>

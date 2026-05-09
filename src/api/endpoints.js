@@ -70,6 +70,16 @@ export const hotels = {
 export const rooms = {
   list: (params) => api.get('/rooms', { params }).then((r) => r.data),
   get: (id) => api.get(`/rooms/${id}`).then((r) => r.data),
+  availability: (id, params) =>
+    api.get(`/rooms/${id}/availability`, { params }).then((r) => r.data),
+  availabilityCheckInTimes: (id, params) =>
+    api
+      .get(`/rooms/${id}/availability/check-in-times`, { params })
+      .then((r) => r.data),
+  availabilityCheckOutTimes: (id, params) =>
+    api
+      .get(`/rooms/${id}/availability/check-out-times`, { params })
+      .then((r) => r.data),
   create: (data) => api.post('/rooms', data).then((r) => r.data),
   update: (id, data) => api.patch(`/rooms/${id}`, data).then((r) => r.data),
   remove: (id) => api.delete(`/rooms/${id}`).then((r) => r.data),
