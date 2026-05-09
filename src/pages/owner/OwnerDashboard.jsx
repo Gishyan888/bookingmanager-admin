@@ -1,9 +1,4 @@
-import {
-  BedDouble,
-  CalendarCheck,
-  DollarSign,
-  Users,
-} from 'lucide-react'
+import { BedDouble, CalendarCheck, Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { RoomStatusPie, TrendAreaChart } from '../../components/charts'
 import { PageHeader } from '../../components/ui/PageHeader'
@@ -11,6 +6,19 @@ import { PageLoader } from '../../components/ui/PageLoader'
 import { StatCard } from '../../components/ui/StatCard'
 import { useDashboard } from '../../hooks/useDashboard'
 import { formatAMD } from '../../utils/format'
+
+/** Armenian dram (AMD) — Lucide has no dram glyph. */
+function AmdIcon({ size = 20 }) {
+  return (
+    <span
+      className="select-none font-semibold tabular-nums leading-none"
+      style={{ fontSize: Math.round(size * 1.1) }}
+      aria-hidden
+    >
+      ֏
+    </span>
+  )
+}
 
 export function OwnerDashboard() {
   const { data, loading } = useDashboard()
@@ -43,7 +51,7 @@ export function OwnerDashboard() {
         description={t('dashboard.ownerSubtitle')}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label={t('dashboard.rooms')}
           value={ttl.rooms}
@@ -67,7 +75,7 @@ export function OwnerDashboard() {
         <StatCard
           label={t('dashboard.revenue')}
           value={formatAMD(ttl.revenue)}
-          icon={DollarSign}
+          icon={AmdIcon}
           tone="rose"
           hint={t('dashboard.lifetime')}
         />
