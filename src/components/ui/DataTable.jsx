@@ -1,7 +1,8 @@
 import clsx from 'clsx'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Search } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PaginationBar } from './PaginationBar'
 import { Spinner } from './Spinner'
 
 export function DataTable({
@@ -20,12 +21,20 @@ export function DataTable({
 }) {
   const { t } = useTranslation()
   const [term, setTerm] = useState('')
+  const onSearchRef = useRef(onSearch)
+  onSearchRef.current = onSearch
 
+  // Debounce only when `term` changes. Do not depend on `onSearch` — parents usually
+  // pass an inline `(v) => { setPage(1); setSearch(v) }`, which is a new reference
+  // every render; including it here re-fired the debounce after each fetch and
+  // reset the table to page 1 while showing stale rows briefly.
   useEffect(() => {
-    if (!onSearch) return undefined
-    const tm = setTimeout(() => onSearch(term), 300)
+    if (!onSearchRef.current) return undefined
+    const tm = setTimeout(() => {
+      onSearchRef.current?.(term)
+    }, 300)
     return () => clearTimeout(tm)
-  }, [term, onSearch])
+  }, [term])
 
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
@@ -118,36 +127,13 @@ export function DataTable({
       </div>
 
       {onPageChange && (
-        <div className="flex flex-col items-stretch gap-2 border-t border-slate-100 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            {t('common.page')} <strong>{page}</strong> {t('common.of')}{' '}
-            {Math.max(1, totalPages)}
-            {total !== undefined ? (
-              <span className="ml-2 text-slate-400 dark:text-slate-500">
-                · {total} {t('common.total')}
-              </span>
-            ) : null}
-          </span>
-          <div className="flex items-center justify-end gap-1">
-            <button
-              type="button"
-              onClick={() => onPageChange(Math.max(1, page - 1))}
-              disabled={page <= 1}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
-            >
-              <ChevronLeft size={16} /> {t('common.prev')}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                onPageChange(Math.min(Math.max(1, totalPages), page + 1))
-              }
-              disabled={page >= Math.max(1, totalPages)}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
-            >
-              {t('common.next')} <ChevronRight size={16} />
-            </button>
-          </div>
+        <div className="border-t border-slate-100 px-4 py-3 dark:border-slate-800">
+          <PaginationBar
+            page={page}
+            totalPages={Math.max(1, totalPages)}
+            total={total}
+            onPageChange={onPageChange}
+          />
         </div>
       )}
     </div>

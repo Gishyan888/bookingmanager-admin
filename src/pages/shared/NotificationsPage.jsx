@@ -5,6 +5,7 @@ import { notifications as notificationsApi } from '../../api/endpoints'
 import { Button } from '../../components/ui/Button'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { PageLoader } from '../../components/ui/PageLoader'
+import { PaginationBar } from '../../components/ui/PaginationBar'
 import { useNotifications } from '../../context/NotificationContext'
 import { formatDateTime } from '../../utils/format'
 import { getTranslatedNotification } from '../../utils/notificationI18n'
@@ -147,28 +148,12 @@ export function NotificationsPage() {
       )}
 
       {!loading && totalPages > 1 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-400">
-          <span>
-            {t('common.page')} {page} {t('common.of')} {totalPages} · {total}{' '}
-            {t('common.total')}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              {t('common.prev')}
-            </Button>
-            <Button
-              variant="secondary"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              {t('common.next')}
-            </Button>
-          </div>
-        </div>
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          onPageChange={setPage}
+        />
       ) : null}
     </div>
   )
