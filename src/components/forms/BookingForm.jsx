@@ -1,13 +1,20 @@
-import clsx from 'clsx'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  buildYmd,
   checkoutMinInstant,
+  clampDayInMonth,
+  daysInCalendarMonth,
+  hmJoin,
+  hmSplit,
   isoNotBeforeFloor,
   isoNotBeforeNow,
   joinLocalIso,
   localIsoMinutesNow,
+  parseYmdStrict,
   splitLocalIso,
+  ymBefore,
+  ymdBefore,
 } from '../../utils/bookingDatetime'
 import { computeNights, formatAMD } from '../../utils/format'
 import { Button } from '../ui/Button'
@@ -15,7 +22,170 @@ import { Input, Select, Textarea } from '../ui/Input'
 import { PhoneInput } from '../ui/PhoneInput'
 
 const pickerInputClass =
-  'block min-h-[2.75rem] w-full rounded-lg border-0 bg-white px-3 py-2 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition focus:ring-2 focus:ring-inset focus:ring-violet-500 md:min-h-0 md:text-sm dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400 [color-scheme:light] dark:[color-scheme:dark]'
+  'block min-h-[2.75rem] w-full rounded-lg border-0 bg-white px-3 py-2 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition focus:ring-2 focus:ring-inset focus:ring-violet-500 md:min-h-0 md:text-sm dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400'
+
+const HM24 = [...Array(24)].map((_, i) =>
+  String(i).padStart(2, '0'),
+)
+const MIN60 = [...Array(60)].map((_, i) =>
+  String(i).padStart(2, '0'),
+)
+
+function dayOptionDisabled(day, year, month, minYmd) {
+  const ymd = buildYmd(year, month, day)
+  return Boolean(minYmd && ymdBefore(ymd, minYmd))
+}
+
+/** Dropdowns **day · month · year** (explicit dd/mm/yyyy order in the UI). */
+function InlineDmyPick({
+  ymd,
+  minYmd,
+  onChangeYmd,
+}) {
+  const now = new Date()
+  const nowY = now.getFullYear()
+  const floor = parseYmdStrict(minYmd || '')
+  let p = parseYmdStrict(ymd || '')
+  if (!p) {
+    const fb = parseYmdStrict(minYmd || '')
+    p = fb ?? {
+      y: nowY,
+      mo: now.getMonth() + 1,
+      d: now.getDate(),
+    }
+  }
+
+  let y = p.y
+  let mo = p.mo
+  let d = clampDayInMonth(y, mo, p.d)
+
+  const yearLow = Math.min(nowY - 2, y)
+  const yearHigh = Math.max(nowY + 8, y, floor?.y ?? y)
+
+  const emit = (py, pm, pd) => {
+    const dc = clampDayInMonth(py, pm, pd)
+    onChangeYmd(buildYmd(py, pm, dc))
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-1.5">
+      <select
+        className={pickerInputClass}
+        aria-label="Day"
+        value={String(d).padStart(2, '0')}
+        required
+        onChange={(e) => {
+          const nextD = Number(e.target.value)
+          emit(y, mo, nextD)
+        }}
+      >
+        {[...Array(daysInCalendarMonth(y, mo))].map((_, i) => {
+          const dv = i + 1
+          const dis = dayOptionDisabled(dv, y, mo, minYmd)
+          return (
+            <option key={dv} value={String(dv).padStart(2, '0')} disabled={dis}>
+              {dv}
+            </option>
+          )
+        })}
+      </select>
+      <select
+        className={pickerInputClass}
+        aria-label="Month"
+        value={String(mo).padStart(2, '0')}
+        required
+        onChange={(e) => {
+          const nextMo = Number(e.target.value)
+          const clampedDay = clampDayInMonth(y, nextMo, d)
+          emit(y, nextMo, clampedDay)
+        }}
+      >
+        {[...Array(12)].map((_, ix) => {
+          const cand = ix + 1
+          const dis = ymBefore(y, cand, minYmd)
+          return (
+            <option key={cand} value={String(cand).padStart(2, '0')} disabled={dis}>
+              {String(cand).padStart(2, '0')}
+            </option>
+          )
+        })}
+      </select>
+      <select
+        className={pickerInputClass}
+        aria-label="Year"
+        value={String(y)}
+        required
+        onChange={(e) => {
+          const nextY = Number(e.target.value)
+          const clampedDay = clampDayInMonth(nextY, mo, d)
+          emit(nextY, mo, clampedDay)
+        }}
+      >
+        {[...Array(yearHigh - yearLow + 1)].map((_, i) => {
+          const yy = yearLow + i
+          const dis = floor && yy < floor.y
+          return (
+            <option key={yy} value={String(yy)} disabled={dis}>
+              {yy}
+            </option>
+          )
+        })}
+      </select>
+    </div>
+  )
+}
+
+/** 24-hour **hour : minute** dropdowns (no AM/PM). */
+function InlineHmPick({ hm, minHm, onChangeHm }) {
+  const { h, mi } = hmSplit(hm || '00:00')
+  const mh = minHm ? hmSplit(minHm) : null
+
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      <select
+        className={pickerInputClass}
+        aria-label="Hour (24h)"
+        required
+        value={String(h).padStart(2, '0')}
+        onChange={(e) => {
+          const nextH = Number(e.target.value)
+          let nextMi = mi
+          if (mh && nextH === mh.h && mi < mh.mi) nextMi = mh.mi
+          onChangeHm(hmJoin(nextH, nextMi))
+        }}
+      >
+        {HM24.map((hhLabel) => {
+          const hh = Number(hhLabel)
+          const dis = Boolean(mh && hh < mh.h)
+          return (
+            <option key={hhLabel} value={hhLabel} disabled={dis}>
+              {hhLabel}
+            </option>
+          )
+        })}
+      </select>
+      <select
+        className={pickerInputClass}
+        aria-label="Minute"
+        required
+        value={String(mi).padStart(2, '0')}
+        onChange={(e) =>
+          onChangeHm(hmJoin(h, Number(e.target.value)))
+        }
+      >
+        {MIN60.map((lab) => {
+          const mv = Number(lab)
+          const dis = Boolean(mh && h === mh.h && mv < mh.mi)
+          return (
+            <option key={lab} value={lab} disabled={dis}>
+              {lab}
+            </option>
+          )
+        })}
+      </select>
+    </div>
+  )
+}
 
 const STATUS = [
   'pending',
@@ -220,8 +390,7 @@ export function BookingForm({
         </div>
       ) : null}
 
-      {/* en-GB nudges browsers toward dd/mm/yyyy and 24-hour time */}
-      <section lang="en-GB" className="rounded-xl px-px">
+      <section className="rounded-xl px-px">
         <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
           {t('bookings.dateFormatHint')}
         </p>
@@ -231,57 +400,52 @@ export function BookingForm({
               {t('bookings.checkIn')}
               <span className="ml-0.5 text-rose-500">*</span>
             </span>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="block min-w-0">
-                <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
-                  {t('bookings.startDate')}
-                </span>
-                <input
-                  type="date"
-                  className={clsx(pickerInputClass, 'tabular-nums')}
-                  value={inDateStr}
-                  required
-                  min={checkInDateMin}
-                  onChange={(e) => {
-                    const d = e.target.value
-                    const tm = splitLocalIso(value.checkIn).time || '14:00'
-                    let iso = d ? joinLocalIso(d, tm) : ''
-                    if (iso && !isEdit)
-                      iso = isoNotBeforeNow(iso.slice(0, 16))
-                    onChange({
-                      ...value,
-                      checkIn: iso,
-                      checkOut: autoCheckOutFromCheckIn(iso),
-                    })
-                  }}
-                />
-              </label>
-              <label className="block min-w-0">
-                <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
-                  {t('bookings.startTime')}
-                </span>
-                <input
-                  type="time"
-                  className={clsx(pickerInputClass, 'tabular-nums')}
-                  value={inTimeStr}
-                  required={Boolean(inDateStr)}
-                  step={60}
-                  min={checkInTimeMin}
-                  onChange={(e) => {
-                    const tm = e.target.value
-                    const d = splitLocalIso(value.checkIn).date
-                    let iso = d ? joinLocalIso(d, tm || '00:00') : ''
-                    if (iso && !isEdit)
-                      iso = isoNotBeforeNow(iso.slice(0, 16))
-                    onChange({
-                      ...value,
-                      checkIn: iso,
-                      checkOut: autoCheckOutFromCheckIn(iso),
-                    })
-                  }}
-                />
-              </label>
-            </div>
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('bookings.startDate')}
+              </span>
+              <p className="mb-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                {t('bookings.ddmmyyyyOrder')}
+              </p>
+              <InlineDmyPick
+                ymd={inDateStr}
+                minYmd={checkInDateMin}
+                onChangeYmd={(nextYmd) => {
+                  const tm = splitLocalIso(value.checkIn).time || '14:00'
+                  let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
+                  if (iso && !isEdit)
+                    iso = isoNotBeforeNow(iso.slice(0, 16))
+                  onChange({
+                    ...value,
+                    checkIn: iso,
+                    checkOut: autoCheckOutFromCheckIn(iso),
+                  })
+                }}
+              />
+            </label>
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('bookings.startTime')}
+              </span>
+              <p className="mb-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                {t('bookings.time24Hint')}
+              </p>
+              <InlineHmPick
+                hm={inTimeStr || '14:00'}
+                minHm={checkInTimeMin}
+                onChangeHm={(nextHm) => {
+                  const d = splitLocalIso(value.checkIn).date
+                  let iso = d ? joinLocalIso(d, nextHm) : ''
+                  if (iso && !isEdit)
+                    iso = isoNotBeforeNow(iso.slice(0, 16))
+                  onChange({
+                    ...value,
+                    checkIn: iso,
+                    checkOut: autoCheckOutFromCheckIn(iso),
+                  })
+                }}
+              />
+            </label>
             <span className="block text-xs text-slate-500 dark:text-slate-400">
               {t('bookings.defaultCheckInHint')}
             </span>
@@ -292,51 +456,46 @@ export function BookingForm({
               {t('bookings.checkOut')}
               <span className="ml-0.5 text-rose-500">*</span>
             </span>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="block min-w-0">
-                <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
-                  {t('bookings.endDate')}
-                </span>
-                <input
-                  type="date"
-                  className={clsx(pickerInputClass, 'tabular-nums')}
-                  value={outDateStr}
-                  required
-                  min={checkoutMinDay}
-                  onChange={(e) => {
-                    const d = e.target.value
-                    const tm = splitLocalIso(value.checkOut).time || '12:00'
-                    let iso = d ? joinLocalIso(d, tm) : ''
-                    iso = iso
-                      ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
-                      : ''
-                    onChange({ ...value, checkOut: iso })
-                  }}
-                />
-              </label>
-              <label className="block min-w-0">
-                <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
-                  {t('bookings.endTime')}
-                </span>
-                <input
-                  type="time"
-                  className={clsx(pickerInputClass, 'tabular-nums')}
-                  value={outTimeStr}
-                  required={Boolean(outDateStr)}
-                  step={60}
-                  min={checkOutTimeMin}
-                  onChange={(e) => {
-                    const tm = e.target.value
-                    const d = splitLocalIso(value.checkOut).date
-                    let iso = d ? joinLocalIso(d, tm || '00:00') : ''
-                    iso = iso
-                      ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
-                      : ''
-                    onChange({ ...value, checkOut: iso })
-                  }}
-                />
-              </label>
-            </div>
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('bookings.endDate')}
+              </span>
+              <p className="mb-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                {t('bookings.ddmmyyyyOrder')}
+              </p>
+              <InlineDmyPick
+                ymd={outDateStr}
+                minYmd={checkoutMinDay}
+                onChangeYmd={(nextYmd) => {
+                  const tm = splitLocalIso(value.checkOut).time || '12:00'
+                  let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
+                  iso = iso
+                    ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
+                    : ''
+                  onChange({ ...value, checkOut: iso })
+                }}
+              />
+            </label>
+            <label className="block min-w-0">
+              <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('bookings.endTime')}
+              </span>
+              <p className="mb-1.5 text-[11px] text-slate-400 dark:text-slate-500">
+                {t('bookings.time24Hint')}
+              </p>
+              <InlineHmPick
+                hm={outTimeStr || '12:00'}
+                minHm={checkOutTimeMin}
+                onChangeHm={(nextHm) => {
+                  const d = splitLocalIso(value.checkOut).date
+                  let iso = d ? joinLocalIso(d, nextHm) : ''
+                  iso = iso
+                    ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
+                    : ''
+                  onChange({ ...value, checkOut: iso })
+                }}
+              />
+            </label>
             <span className="block text-xs text-slate-500 dark:text-slate-400">
               {t('bookings.defaultCheckOutHint')}
             </span>
