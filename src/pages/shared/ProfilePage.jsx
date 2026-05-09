@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { users } from '../../api/endpoints'
 import { Button } from '../../components/ui/Button'
-import { Input } from '../../components/ui/Input'
+import { Input, Select } from '../../components/ui/Input'
 import { PhoneInput, phoneForSubmit } from '../../components/ui/PhoneInput'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { useAuth } from '../../context/AuthContext'
+import { SUPPORTED_LANGS } from '../../i18n'
 
 export function ProfilePage() {
   const { t } = useTranslation()
@@ -18,6 +19,8 @@ export function ProfilePage() {
     email: '',
     phone: '',
     password: '',
+    preferredLanguage: 'hy',
+    preferredTheme: 'light',
   })
 
   useEffect(() => {
@@ -29,6 +32,8 @@ export function ProfilePage() {
           email: u.email || '',
           phone: u.phone || '',
           password: '',
+          preferredLanguage: u.preferredLanguage || 'hy',
+          preferredTheme: u.preferredTheme || 'light',
         }),
       )
       .finally(() => setLoading(false))
@@ -41,6 +46,8 @@ export function ProfilePage() {
       const payload = {
         name: form.name,
         phone: phoneForSubmit(form.phone) || undefined,
+        preferredLanguage: form.preferredLanguage,
+        preferredTheme: form.preferredTheme,
       }
       if (form.password) payload.password = form.password
       await users.updateMe(payload)
@@ -76,6 +83,32 @@ export function ProfilePage() {
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Select
+                label={t('common.language')}
+                value={form.preferredLanguage}
+                onChange={(e) =>
+                  setForm({ ...form, preferredLanguage: e.target.value })
+                }
+              >
+                {SUPPORTED_LANGS.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.native}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                label={t('common.theme')}
+                value={form.preferredTheme}
+                onChange={(e) =>
+                  setForm({ ...form, preferredTheme: e.target.value })
+                }
+              >
+                <option value="light">{t('common.themeLight')}</option>
+                <option value="dark">{t('common.themeDark')}</option>
+                <option value="system">{t('common.themeSystem')}</option>
+              </Select>
+            </div>
             <Input
               label={t('auth.newPassword')}
               type="password"

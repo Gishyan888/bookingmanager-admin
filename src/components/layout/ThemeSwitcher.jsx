@@ -1,15 +1,12 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { users } from '../../api/endpoints'
-import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 
 const ICONS = { light: Sun, dark: Moon, system: Monitor }
 
 export function ThemeSwitcher() {
   const { mode, setTheme, resolved } = useTheme()
-  const { user, refreshUser } = useAuth()
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -55,12 +52,6 @@ export function ThemeSwitcher() {
                 onClick={() => {
                   setTheme(it.id)
                   localStorage.setItem('bm_theme', it.id)
-                  if (user) {
-                    users
-                      .updateMe({ preferredTheme: it.id })
-                      .then(() => refreshUser())
-                      .catch(() => {})
-                  }
                   setOpen(false)
                 }}
                 className={`flex w-full items-center justify-between px-3 py-2 text-sm transition ${

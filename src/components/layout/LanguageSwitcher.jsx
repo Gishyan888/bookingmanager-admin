@@ -1,9 +1,7 @@
 import { Globe } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { users } from '../../api/endpoints'
 import { SUPPORTED_LANGS } from '../../i18n'
-import { useAuth } from '../../context/AuthContext'
 
 function FlagIcon({ lang, className = 'h-4 w-6' }) {
   const [failed, setFailed] = useState(false)
@@ -23,7 +21,6 @@ function FlagIcon({ lang, className = 'h-4 w-6' }) {
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation()
-  const { user, refreshUser } = useAuth()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -68,12 +65,6 @@ export function LanguageSwitcher() {
                 onClick={() => {
                   i18n.changeLanguage(l.code)
                   localStorage.setItem('bm_lang', l.code)
-                  if (user) {
-                    users
-                      .updateMe({ preferredLanguage: l.code })
-                      .then(() => refreshUser())
-                      .catch(() => {})
-                  }
                   setOpen(false)
                 }}
                 className={`flex w-full items-center justify-between px-3 py-2 text-sm transition ${
