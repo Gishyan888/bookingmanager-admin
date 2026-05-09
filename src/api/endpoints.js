@@ -21,8 +21,19 @@ export const dashboard = {
 export const users = {
   me: () => api.get('/users/me').then((r) => r.data),
   updateMe: (data) => api.patch('/users/me', data).then((r) => r.data),
-  updateMyPreferences: (data) =>
-    api.patch('/users/me/preferences', data).then((r) => r.data),
+  updateMyPreferences: async (data) => {
+    try {
+      const res = await api.patch('/users/me/preferences', data)
+      return res.data
+    } catch (err) {
+      // Compatibility fallback for servers that only support PATCH /users/me.
+      if (err?.response?.status === 404) {
+        const fallback = await api.patch('/users/me', data)
+        return fallback.data
+      }
+      throw err
+    }
+  },
   listOwners: (params) =>
     api.get('/users/owners', { params }).then((r) => r.data),
   myManagers: (params) =>

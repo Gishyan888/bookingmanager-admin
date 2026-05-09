@@ -91,14 +91,14 @@ export function ProfilePage() {
         description={t('profile.subtitle')}
       />
 
-      <div className="max-w-2xl space-y-4">
+      <div className="grid max-w-6xl gap-4 lg:grid-cols-12">
         {loading ? (
-          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-12">
             <p className="text-sm text-slate-500 dark:text-slate-400">{t('common.loading')}</p>
           </div>
         ) : (
           <>
-            <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 lg:col-span-8">
               <form className="space-y-4" onSubmit={submitProfile}>
                 <Input
                   label={t('auth.fullName')}
@@ -127,51 +127,51 @@ export function ProfilePage() {
               </form>
             </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <Globe size={16} />
-                <span>{t('common.language')}</span>
+            <div className="space-y-4 lg:col-span-4">
+              <div className="rounded-2xl border border-violet-100 bg-linear-to-br from-violet-50 to-white p-5 shadow-sm ring-1 ring-violet-100 dark:border-violet-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-violet-900/50">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <Globe size={16} className="text-violet-600 dark:text-violet-300" />
+                  <span>{t('common.language')}</span>
+                </div>
+                <Select
+                  value={form.preferredLanguage}
+                  onChange={(e) =>
+                    setForm({ ...form, preferredLanguage: e.target.value })
+                  }
+                >
+                  {SUPPORTED_LANGS.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.native}
+                    </option>
+                  ))}
+                </Select>
+                <div className="mt-3 flex justify-end">
+                  <Button type="button" loading={busyLanguage} onClick={saveLanguage}>
+                    {t('common.saveChanges')}
+                  </Button>
+                </div>
               </div>
-              <Select
-                label={t('common.language')}
-                value={form.preferredLanguage}
-                onChange={(e) =>
-                  setForm({ ...form, preferredLanguage: e.target.value })
-                }
-              >
-                {SUPPORTED_LANGS.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.native}
-                  </option>
-                ))}
-              </Select>
-              <div className="mt-3 flex justify-end">
-                <Button type="button" loading={busyLanguage} onClick={saveLanguage}>
-                  {t('common.saveChanges')}
-                </Button>
-              </div>
-            </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                <Palette size={16} />
-                <span>{t('common.theme')}</span>
-              </div>
-              <Select
-                label={t('common.theme')}
-                value={form.preferredTheme}
-                onChange={(e) =>
-                  setForm({ ...form, preferredTheme: e.target.value })
-                }
-              >
-                <option value="light">{t('common.themeLight')}</option>
-                <option value="dark">{t('common.themeDark')}</option>
-                <option value="system">{t('common.themeSystem')}</option>
-              </Select>
-              <div className="mt-3 flex justify-end">
-                <Button type="button" loading={busyTheme} onClick={saveTheme}>
-                  {t('common.saveChanges')}
-                </Button>
+              <div className="rounded-2xl border border-indigo-100 bg-linear-to-br from-indigo-50 to-white p-5 shadow-sm ring-1 ring-indigo-100 dark:border-indigo-900/60 dark:from-slate-900 dark:to-slate-900 dark:ring-indigo-900/50">
+                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  <Palette size={16} className="text-indigo-600 dark:text-indigo-300" />
+                  <span>{t('common.theme')}</span>
+                </div>
+                <Select
+                  value={form.preferredTheme}
+                  onChange={(e) =>
+                    setForm({ ...form, preferredTheme: e.target.value })
+                  }
+                >
+                  <option value="light">{t('common.themeLight')}</option>
+                  <option value="dark">{t('common.themeDark')}</option>
+                  <option value="system">{t('common.themeSystem')}</option>
+                </Select>
+                <div className="mt-3 flex justify-end">
+                  <Button type="button" loading={busyTheme} onClick={saveTheme}>
+                    {t('common.saveChanges')}
+                  </Button>
+                </div>
               </div>
             </div>
           </>
