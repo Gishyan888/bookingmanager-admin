@@ -171,6 +171,11 @@
     "deletedToast": "Менеджер удален",
     "searchPh": "Поиск менеджеров…"
   },
+  "profile": {
+    "title": "Мой профиль",
+    "subtitle": "Обновите данные аккаунта. Email изменить нельзя.",
+    "updatedToast": "Профиль обновлён"
+  },
   "hotels": {
     "title": "Отели",
     "subtitle": "Все отели платформы с владельцами, числом номеров и загрузкой.",
@@ -441,7 +446,12 @@
       "ownerIdRequired": "Нужно указать владельца.",
       "ownerNotFound": "Владелец не найден.",
       "managersCannotCreateHotels": "Менеджеры не могут создавать отели.",
-      "ownerUserNotFound": "Пользователь-владелец не найден."
+      "ownerUserNotFound": "Пользователь-владелец не найден.",
+      "ownerManagersOnlyCreate": "Владелец может создавать только менеджеров.",
+      "ownerManagersOnlyManage": "Владелец может управлять только менеджерами.",
+      "managerMustHaveHotel": "Менеджер должен быть назначен на отель.",
+      "hotelNotBelongOwner": "Отель не принадлежит текущему владельцу.",
+      "managerNotFound": "Менеджер не найден."
     }
   },
   "notFound": {

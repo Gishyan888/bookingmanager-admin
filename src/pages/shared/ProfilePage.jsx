@@ -46,7 +46,7 @@ export function ProfilePage() {
       await users.updateMe(payload)
       await refreshUser()
       setForm((f) => ({ ...f, password: '' }))
-      toast.success('Profile updated')
+      toast.success(t('profile.updatedToast'))
     } finally {
       setBusy(false)
     }
@@ -55,8 +55,8 @@ export function ProfilePage() {
   return (
     <>
       <PageHeader
-        title="My profile"
-        description="Update your account details. Email cannot be changed."
+        title={t('profile.title')}
+        description={t('profile.subtitle')}
       />
 
       <div className="max-w-2xl rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">

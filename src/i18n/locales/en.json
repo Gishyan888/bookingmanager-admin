@@ -171,6 +171,11 @@
     "deletedToast": "Manager deleted",
     "searchPh": "Search managers…"
   },
+  "profile": {
+    "title": "My profile",
+    "subtitle": "Update your account details. Email cannot be changed.",
+    "updatedToast": "Profile updated"
+  },
   "hotels": {
     "title": "Hotels",
     "subtitle": "All hotels on the platform with owner, room counts and occupancy.",
@@ -441,7 +446,12 @@
       "ownerIdRequired": "Owner is required.",
       "ownerNotFound": "Owner not found.",
       "managersCannotCreateHotels": "Managers cannot create hotels.",
-      "ownerUserNotFound": "Owner user not found."
+      "ownerUserNotFound": "Owner user not found.",
+      "ownerManagersOnlyCreate": "Owners can only create manager accounts.",
+      "ownerManagersOnlyManage": "Owners can only manage manager accounts.",
+      "managerMustHaveHotel": "Manager must be assigned to a hotel.",
+      "hotelNotBelongOwner": "Hotel does not belong to current owner.",
+      "managerNotFound": "Manager not found."
     }
   },
   "notFound": {

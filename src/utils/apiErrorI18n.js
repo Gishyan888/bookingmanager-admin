@@ -23,9 +23,12 @@ const API_MESSAGE_KEYS = {
     'errors.api.accountInactive',
   'Your account is inactive. Verify your email with OTP first.':
     'errors.api.accountInactive',
+  'Your account is inactive. Verify email OTP first.':
+    'errors.api.accountInactive',
   'The hotel owner account is currently disabled.':
     'errors.api.ownerAccountDisabled',
   'Invalid or expired OTP': 'errors.api.invalidOtp',
+  'OTP is invalid or expired': 'errors.api.invalidOtp',
   'Notification not found': 'errors.api.notificationNotFound',
   'Not authenticated': 'errors.api.notAuthenticated',
   'Invalid or inactive user': 'errors.api.invalidOrInactiveUser',
@@ -38,6 +41,15 @@ const API_MESSAGE_KEYS = {
   'Owner not found': 'errors.api.ownerNotFound',
   'Managers cannot create hotels': 'errors.api.managersCannotCreateHotels',
   'Owner user not found': 'errors.api.ownerUserNotFound',
+  'Owners can only create manager accounts':
+    'errors.api.ownerManagersOnlyCreate',
+  'Owners can only manage manager accounts':
+    'errors.api.ownerManagersOnlyManage',
+  'Manager must be assigned to a hotel':
+    'errors.api.managerMustHaveHotel',
+  'Hotel does not belong to current owner':
+    'errors.api.hotelNotBelongOwner',
+  'Manager not found': 'errors.api.managerNotFound',
 }
 
 const VALIDATION_HINT =
