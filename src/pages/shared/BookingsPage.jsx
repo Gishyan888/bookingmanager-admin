@@ -88,20 +88,12 @@ export function BookingsPage() {
       checkOut: toLocalInput(co),
       status: 'confirmed',
       notes: '',
-      useCustomTotal: false,
       customTotalAmount: '',
     })
     setOpenForm(true)
   }
   const openEdit = (b) => {
-    const nights = computeNights(b.checkIn, b.checkOut)
-    const rate =
-      b.room?.price != null ? Number(b.room.price) : Number.NaN
-    const computed =
-      Number.isFinite(rate) && nights > 0 ? rate * nights : 0
     const stored = Number(b.totalAmount ?? 0)
-    const useCustom =
-      computed > 0 && Math.abs(stored - computed) > 0.5
     setEditing({
       id: b.id,
       roomId: b.roomId,
@@ -112,9 +104,7 @@ export function BookingsPage() {
       checkOut: toLocalInput(new Date(b.checkOut)),
       status: b.status,
       notes: b.notes ?? '',
-      useCustomTotal: useCustom,
-      customTotalAmount:
-        useCustom || stored > 0 ? String(Math.round(stored)) : '',
+      customTotalAmount: String(Math.round(stored)),
     })
     setOpenForm(true)
   }
@@ -157,19 +147,14 @@ export function BookingsPage() {
           ? Number(selectedRoom.price) * nights
           : 0
 
-      if (editing.useCustomTotal) {
-        const raw = Number(
-          String(editing.customTotalAmount ?? '').replace(/\s/g, ''),
-        )
-        if (!Number.isFinite(raw) || raw < 0) {
-          toast.error(t('bookings.customTotalInvalid'))
-          setBusy(false)
-          return
-        }
-        payload.totalAmount = raw
-      } else if (editing.id) {
-        payload.totalAmount = computed
-      }
+      const rawAmt = String(editing.customTotalAmount ?? '').trim()
+      const parsedAmt = Number(rawAmt.replace(/\s/g, ''))
+      const totalAmount =
+        rawAmt !== '' && Number.isFinite(parsedAmt) && parsedAmt >= 0
+          ? parsedAmt
+          : computed
+
+      payload.totalAmount = totalAmount
 
       if (editing.id) {
         delete payload.roomId

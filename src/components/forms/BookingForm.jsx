@@ -20,6 +20,7 @@ import { computeNights, formatAMD } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { Input, Select, Textarea } from '../ui/Input'
 import { PhoneInput } from '../ui/PhoneInput'
+import { NumberInput } from '../ui/NumberInput'
 
 const pickerInputClass =
   'block min-h-[2.75rem] w-full rounded-lg border-0 bg-white px-3 py-2 text-base shadow-sm ring-1 ring-inset ring-slate-200 transition focus:ring-2 focus:ring-inset focus:ring-violet-500 md:min-h-0 md:text-sm dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700 dark:focus:ring-violet-400'
@@ -197,6 +198,15 @@ const STATUS = [
 
 const NEW_GUEST = '__new_guest__'
 
+/** When room / stay dates change, recompute default total from list price × nights. */
+function withListedTotal(patch, prev, rooms) {
+  const next = { ...prev, ...patch }
+  const rr = rooms.find((r) => r.id === next.roomId)
+  const nts = computeNights(next.checkIn, next.checkOut)
+  const c = rr && nts > 0 ? Math.round(Number(rr.price) * nts) : 0
+  return { ...next, customTotalAmount: String(c) }
+}
+
 function emptyNewCustomer() {
   return { name: '', phone: '', idDocument: '', description: '' }
 }
@@ -216,13 +226,13 @@ export function BookingForm({
   const room = rooms.find((r) => r.id === value.roomId)
   const nights = computeNights(value.checkIn, value.checkOut)
   const computedTotal = room ? Number(room.price) * nights : 0
-  const useCustomTotal = Boolean(value.useCustomTotal)
-  const chargedTotal = useCustomTotal
-    ? Math.max(
-        0,
-        Number(String(value.customTotalAmount ?? '').replace(/\s/g, '')) || 0,
-      )
-    : computedTotal
+  const computedRounded = Math.round(computedTotal || 0)
+  const rawTotalStr = String(value.customTotalAmount ?? '').trim()
+  const totalInputParsed = Number(rawTotalStr.replace(/\s/g, ''))
+  const displayTotalAMD =
+    rawTotalStr !== '' && Number.isFinite(totalInputParsed)
+      ? Math.max(0, Math.round(totalInputParsed))
+      : computedRounded
 
   const autoCheckOutFromCheckIn = (checkInValue) => {
     if (!checkInValue) return value.checkOut
@@ -276,13 +286,15 @@ export function BookingForm({
       : undefined
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
-        <div className="space-y-3 lg:col-span-5">
+    <form className="space-y-3" onSubmit={onSubmit}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+        <div className="min-w-0 shrink-0 grow sm:basis-[min(100%,14rem)] sm:max-w-[17rem]">
           <Select
             label={t('bookings.room')}
             value={value.roomId}
-            onChange={(e) => onChange({ ...value, roomId: e.target.value })}
+            onChange={(e) =>
+              onChange(withListedTotal({ roomId: e.target.value }, value, rooms))
+            }
             required
             disabled={isEdit}
           >
@@ -296,7 +308,9 @@ export function BookingForm({
               </option>
             ))}
           </Select>
+        </div>
 
+        <div className="min-w-0 grow sm:basis-[min(100%,14rem)] sm:max-w-[20rem]">
           <Select
             label={t('customers.customer')}
             value={
@@ -333,181 +347,9 @@ export function BookingForm({
               </option>
             ))}
           </Select>
-
-          {!isEdit && value.useNewCustomer ? (
-            <div className="space-y-2.5 rounded-xl border border-violet-200/80 bg-violet-50/40 p-3 dark:border-violet-500/25 dark:bg-violet-500/5">
-              <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                  {t('bookings.newGuestSection')}
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {t('bookings.newGuestHint')}
-                </p>
-              </div>
-              <Input
-                label={t('auth.fullName')}
-                value={value.newCustomer?.name ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    newCustomer: {
-                      ...(value.newCustomer ?? emptyNewCustomer()),
-                      name: e.target.value,
-                    },
-                  })
-                }
-                required
-              />
-              <PhoneInput
-                label={t('auth.phone')}
-                value={value.newCustomer?.phone ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    newCustomer: {
-                      ...(value.newCustomer ?? emptyNewCustomer()),
-                      phone: e.target.value,
-                    },
-                  })
-                }
-              />
-              <Input
-                label={t('customers.idDocument')}
-                value={value.newCustomer?.idDocument ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    newCustomer: {
-                      ...(value.newCustomer ?? emptyNewCustomer()),
-                      idDocument: e.target.value,
-                    },
-                  })
-                }
-              />
-              <Textarea
-                label={t('customers.description')}
-                rows={2}
-                value={value.newCustomer?.description ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    newCustomer: {
-                      ...(value.newCustomer ?? emptyNewCustomer()),
-                      description: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-          ) : null}
         </div>
 
-        <div className="space-y-2 lg:col-span-7">
-          <section className="rounded-lg border border-slate-100 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-950/40">
-            <p className="mb-3 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-              {t('bookings.dateFormatHint')}
-            </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  {t('bookings.checkIn')}
-                  <span className="ml-0.5 text-rose-500">*</span>
-                </span>
-                <label className="block min-w-0">
-                  <span className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('bookings.startDate')} · {t('bookings.ddmmyyyyOrder')}
-                  </span>
-                  <InlineDmyPick
-                    ymd={inDateStr}
-                    minYmd={checkInDateMin}
-                    onChangeYmd={(nextYmd) => {
-                      const tm = splitLocalIso(value.checkIn).time || '14:00'
-                      let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
-                      if (iso && !isEdit)
-                        iso = isoNotBeforeNow(iso.slice(0, 16))
-                      onChange({
-                        ...value,
-                        checkIn: iso,
-                        checkOut: autoCheckOutFromCheckIn(iso),
-                      })
-                    }}
-                  />
-                </label>
-                <label className="block min-w-0">
-                  <span className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('bookings.startTime')} · {t('bookings.time24Hint')}
-                  </span>
-                  <InlineHmPick
-                    hm={inTimeStr || '14:00'}
-                    minHm={checkInTimeMin}
-                    onChangeHm={(nextHm) => {
-                      const d = splitLocalIso(value.checkIn).date
-                      let iso = d ? joinLocalIso(d, nextHm) : ''
-                      if (iso && !isEdit)
-                        iso = isoNotBeforeNow(iso.slice(0, 16))
-                      onChange({
-                        ...value,
-                        checkIn: iso,
-                        checkOut: autoCheckOutFromCheckIn(iso),
-                      })
-                    }}
-                  />
-                </label>
-                <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-                  {t('bookings.defaultCheckInHint')}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                <span className="block text-sm font-semibold text-slate-800 dark:text-slate-100">
-                  {t('bookings.checkOut')}
-                  <span className="ml-0.5 text-rose-500">*</span>
-                </span>
-                <label className="block min-w-0">
-                  <span className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('bookings.endDate')} · {t('bookings.ddmmyyyyOrder')}
-                  </span>
-                  <InlineDmyPick
-                    ymd={outDateStr}
-                    minYmd={checkoutMinDay}
-                    onChangeYmd={(nextYmd) => {
-                      const tm = splitLocalIso(value.checkOut).time || '12:00'
-                      let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
-                      iso = iso
-                        ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
-                        : ''
-                      onChange({ ...value, checkOut: iso })
-                    }}
-                  />
-                </label>
-                <label className="block min-w-0">
-                  <span className="mb-0.5 block text-[11px] font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    {t('bookings.endTime')} · {t('bookings.time24Hint')}
-                  </span>
-                  <InlineHmPick
-                    hm={outTimeStr || '12:00'}
-                    minHm={checkOutTimeMin}
-                    onChangeHm={(nextHm) => {
-                      const d = splitLocalIso(value.checkOut).date
-                      let iso = d ? joinLocalIso(d, nextHm) : ''
-                      iso = iso
-                        ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
-                        : ''
-                      onChange({ ...value, checkOut: iso })
-                    }}
-                  />
-                </label>
-                <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-                  {t('bookings.defaultCheckOutHint')}
-                </span>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:gap-4">
-        <div className="lg:col-span-3">
+        <div className="min-w-0 shrink-0 sm:w-44">
           <Select
             label={t('common.status')}
             value={value.status}
@@ -520,112 +362,233 @@ export function BookingForm({
             ))}
           </Select>
         </div>
-        <div className="space-y-2 lg:col-span-6">
-          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-violet-200/90 bg-white px-3 py-2.5 shadow-sm dark:border-violet-500/30 dark:bg-slate-900">
-            <input
-              type="checkbox"
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500 dark:border-slate-600"
-              checked={useCustomTotal}
-              onChange={(e) => {
-                const next = e.target.checked
-                onChange({
-                  ...value,
-                  useCustomTotal: next,
-                  customTotalAmount: next
-                    ? String(
-                        Math.max(
-                          0,
-                          Math.round(
-                            computedTotal > 0
-                              ? computedTotal
-                              : Number(
-                                  String(value.customTotalAmount ?? '')
-                                    .replace(/\s/g, ''),
-                                ) || 0,
-                          ),
-                        ),
-                      )
-                    : (value.customTotalAmount ?? ''),
-                })
-              }}
-            />
-            <span className="min-w-0 text-sm leading-snug">
-              <span className="font-medium text-slate-800 dark:text-slate-100">
-                {t('bookings.useCustomTotal')}
-              </span>
-              <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
-                {t('bookings.useCustomTotalHint')}
-              </span>
-            </span>
-          </label>
+      </div>
+
+      {!isEdit && value.useNewCustomer ? (
+        <div className="grid gap-2 rounded-lg border border-violet-200/70 bg-violet-50/30 p-2.5 sm:grid-cols-2 dark:border-violet-500/25 dark:bg-violet-500/5">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-100 sm:col-span-2">
+            {t('bookings.newGuestSection')}
+          </p>
           <Input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            step={1}
-            label={t('bookings.customTotalLabel')}
-            className={!useCustomTotal ? 'opacity-50' : ''}
-            disabled={!useCustomTotal}
-            value={
-              useCustomTotal ? String(value.customTotalAmount ?? '') : ''
-            }
-            placeholder={
-              computedTotal ? String(Math.round(computedTotal)) : '0'
-            }
+            label={t('auth.fullName')}
+            value={value.newCustomer?.name ?? ''}
             onChange={(e) =>
-              onChange({ ...value, customTotalAmount: e.target.value })
+              onChange({
+                ...value,
+                newCustomer: {
+                  ...(value.newCustomer ?? emptyNewCustomer()),
+                  name: e.target.value,
+                },
+              })
+            }
+            required
+          />
+          <PhoneInput
+            label={t('auth.phone')}
+            value={value.newCustomer?.phone ?? ''}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                newCustomer: {
+                  ...(value.newCustomer ?? emptyNewCustomer()),
+                  phone: e.target.value,
+                },
+              })
             }
           />
-        </div>
-        <div className="lg:col-span-3">
+          <Input
+            label={t('customers.idDocument')}
+            value={value.newCustomer?.idDocument ?? ''}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                newCustomer: {
+                  ...(value.newCustomer ?? emptyNewCustomer()),
+                  idDocument: e.target.value,
+                },
+              })
+            }
+          />
           <Textarea
-            label={t('bookings.notes')}
-            rows={3}
-            className="min-h-[5.25rem]"
-            value={value.notes || ''}
+            className="min-h-[3.25rem] sm:col-span-2"
+            label={t('customers.description')}
+            rows={2}
+            value={value.newCustomer?.description ?? ''}
             onChange={(e) =>
-              onChange({ ...value, notes: e.target.value })
+              onChange({
+                ...value,
+                newCustomer: {
+                  ...(value.newCustomer ?? emptyNewCustomer()),
+                  description: e.target.value,
+                },
+              })
             }
           />
         </div>
-      </div>
+      ) : null}
 
-      <div className="flex flex-col gap-3 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50/80 px-4 py-3 ring-1 ring-violet-100 dark:from-violet-500/10 dark:to-indigo-950/30 dark:ring-violet-500/20 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-300">
-            {useCustomTotal
-              ? t('bookings.chargedTotal')
-              : t('bookings.standardTotal')}
+      <section className="rounded-lg border border-slate-200/90 bg-slate-50/50 p-3 dark:border-slate-700 dark:bg-slate-900/50">
+        <p className="mb-2 text-[11px] text-slate-500 dark:text-slate-400">
+          {t('bookings.dateFormatHint')}
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-2">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {t('bookings.checkIn')}
+              <span className="text-rose-500">*</span>
+            </div>
+            <div>
+              <span className="mb-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                {t('bookings.startDate')}
+              </span>
+              <InlineDmyPick
+                ymd={inDateStr}
+                minYmd={checkInDateMin}
+                onChangeYmd={(nextYmd) => {
+                  const tm = splitLocalIso(value.checkIn).time || '14:00'
+                  let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
+                  if (iso && !isEdit)
+                    iso = isoNotBeforeNow(iso.slice(0, 16))
+                  onChange(
+                    withListedTotal(
+                      {
+                        checkIn: iso,
+                        checkOut: autoCheckOutFromCheckIn(iso),
+                      },
+                      value,
+                      rooms,
+                    ),
+                  )
+                }}
+              />
+            </div>
+            <div>
+              <span className="mb-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                {t('bookings.startTime')}
+              </span>
+              <InlineHmPick
+                hm={inTimeStr || '14:00'}
+                minHm={checkInTimeMin}
+                onChangeHm={(nextHm) => {
+                  const d = splitLocalIso(value.checkIn).date
+                  let iso = d ? joinLocalIso(d, nextHm) : ''
+                  if (iso && !isEdit)
+                    iso = isoNotBeforeNow(iso.slice(0, 16))
+                  onChange(
+                    withListedTotal(
+                      {
+                        checkIn: iso,
+                        checkOut: autoCheckOutFromCheckIn(iso),
+                      },
+                      value,
+                      rooms,
+                    ),
+                  )
+                }}
+              />
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {t('bookings.defaultCheckInHint')}
+            </p>
           </div>
-          <div className="truncate text-xs text-slate-600 dark:text-slate-300">
-            {nights > 0 && room
-              ? t('bookings.nightsCalcShort', {
-                  nights,
-                  rate: formatAMD(room.price),
-                  standard: formatAMD(computedTotal),
-                })
-              : t('bookings.pickDates')}
+
+          <div className="space-y-2">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {t('bookings.checkOut')}
+              <span className="text-rose-500">*</span>
+            </div>
+            <div>
+              <span className="mb-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                {t('bookings.endDate')}
+              </span>
+              <InlineDmyPick
+                ymd={outDateStr}
+                minYmd={checkoutMinDay}
+                onChangeYmd={(nextYmd) => {
+                  const tm = splitLocalIso(value.checkOut).time || '12:00'
+                  let iso = nextYmd ? joinLocalIso(nextYmd, tm) : ''
+                  iso = iso
+                    ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
+                    : ''
+                  onChange(withListedTotal({ checkOut: iso }, value, rooms))
+                }}
+              />
+            </div>
+            <div>
+              <span className="mb-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                {t('bookings.endTime')}
+              </span>
+              <InlineHmPick
+                hm={outTimeStr || '12:00'}
+                minHm={checkOutTimeMin}
+                onChangeHm={(nextHm) => {
+                  const d = splitLocalIso(value.checkOut).date
+                  let iso = d ? joinLocalIso(d, nextHm) : ''
+                  iso = iso
+                    ? isoNotBeforeFloor(iso.slice(0, 16), checkoutFloor)
+                    : ''
+                  onChange(withListedTotal({ checkOut: iso }, value, rooms))
+                }}
+              />
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {t('bookings.defaultCheckOutHint')}
+            </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-baseline gap-3">
-          {useCustomTotal && computedTotal > 0 ? (
-            <span className="text-sm text-slate-400 line-through dark:text-slate-500">
-              {formatAMD(computedTotal)}
+      </section>
+
+      <Textarea
+        label={t('bookings.notes')}
+        rows={2}
+        className="min-h-[3.75rem]"
+        value={value.notes || ''}
+        onChange={(e) => onChange({ ...value, notes: e.target.value })}
+      />
+
+      <div className="flex flex-col gap-3 border-t border-slate-200 pt-3 dark:border-slate-700 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-end sm:gap-4">
+          <div className="w-full shrink-0 sm:w-40">
+            <NumberInput
+              label={t('bookings.totalAmd')}
+              min={0}
+              value={value.customTotalAmount ?? ''}
+              onChange={(e) =>
+                onChange({ ...value, customTotalAmount: e.target.value })
+              }
+              className="tabular-nums"
+            />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              {t('bookings.totalAmdFootnote')}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-baseline gap-x-2 gap-y-0.5 pb-0.5 text-slate-700 dark:text-slate-200">
+            {nights > 0 && room ? (
+              <span className="text-xs tabular-nums">
+                {nights} × {formatAMD(room.price)}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-500">{t('bookings.pickDates')}</span>
+            )}
+            {computedRounded > 0 &&
+            Math.round(displayTotalAMD) !== computedRounded ? (
+              <span className="text-sm text-slate-400 line-through dark:text-slate-500">
+                {formatAMD(computedRounded)}
+              </span>
+            ) : null}
+            <span className="text-lg font-semibold tabular-nums text-slate-900 dark:text-white">
+              {formatAMD(displayTotalAMD)}
             </span>
-          ) : null}
-          <span className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">
-            {formatAMD(chargedTotal)}
-          </span>
+          </div>
         </div>
-      </div>
-
-      <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-        <Button variant="secondary" type="button" onClick={onCancel}>
-          {t('common.cancel')}
-        </Button>
-        <Button type="submit" loading={busy}>
-          {isEdit ? t('common.save') : t('common.create')}
-        </Button>
+        <div className="flex shrink-0 justify-end gap-2">
+          <Button variant="secondary" type="button" onClick={onCancel}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="submit" loading={busy}>
+            {isEdit ? t('common.save') : t('common.create')}
+          </Button>
+        </div>
       </div>
     </form>
   )
