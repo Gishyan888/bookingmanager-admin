@@ -88,10 +88,20 @@ export function BookingsPage() {
       checkOut: toLocalInput(co),
       status: 'confirmed',
       notes: '',
+      useCustomTotal: false,
+      customTotalAmount: '',
     })
     setOpenForm(true)
   }
   const openEdit = (b) => {
+    const nights = computeNights(b.checkIn, b.checkOut)
+    const rate =
+      b.room?.price != null ? Number(b.room.price) : Number.NaN
+    const computed =
+      Number.isFinite(rate) && nights > 0 ? rate * nights : 0
+    const stored = Number(b.totalAmount ?? 0)
+    const useCustom =
+      computed > 0 && Math.abs(stored - computed) > 0.5
     setEditing({
       id: b.id,
       roomId: b.roomId,
@@ -102,6 +112,9 @@ export function BookingsPage() {
       checkOut: toLocalInput(new Date(b.checkOut)),
       status: b.status,
       notes: b.notes ?? '',
+      useCustomTotal: useCustom,
+      customTotalAmount:
+        useCustom || stored > 0 ? String(Math.round(stored)) : '',
     })
     setOpenForm(true)
   }
@@ -118,7 +131,6 @@ export function BookingsPage() {
     }
     setBusy(true)
     try {
-      // Don't send totalAmount — backend auto-computes from room price * nights.
       let customerId = editing.customerId
       if (!editing.id && editing.useNewCustomer) {
         const nc = editing.newCustomer ?? emptyNewCustomer()
@@ -138,6 +150,27 @@ export function BookingsPage() {
         status: editing.status,
         notes: editing.notes,
       }
+      const nights = computeNights(editing.checkIn, editing.checkOut)
+      const selectedRoom = roomList.find((r) => r.id === editing.roomId)
+      const computed =
+        selectedRoom && nights > 0
+          ? Number(selectedRoom.price) * nights
+          : 0
+
+      if (editing.useCustomTotal) {
+        const raw = Number(
+          String(editing.customTotalAmount ?? '').replace(/\s/g, ''),
+        )
+        if (!Number.isFinite(raw) || raw < 0) {
+          toast.error(t('bookings.customTotalInvalid'))
+          setBusy(false)
+          return
+        }
+        payload.totalAmount = raw
+      } else if (editing.id) {
+        payload.totalAmount = computed
+      }
+
       if (editing.id) {
         delete payload.roomId
         await bookings.update(editing.id, payload)
@@ -328,7 +361,7 @@ export function BookingsPage() {
         open={openForm}
         onClose={() => setOpenForm(false)}
         title={editing?.id ? t('bookings.editBooking') : t('bookings.newBooking')}
-        size="lg"
+        size="xl"
       >
         {editing && (
           <BookingForm

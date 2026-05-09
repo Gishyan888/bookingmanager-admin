@@ -19,7 +19,13 @@ export function Modal({ open, onClose, title, children, size = 'md' }) {
   if (!open) return null
 
   const sizeClass =
-    size === 'lg' ? 'max-w-2xl' : size === 'sm' ? 'max-w-md' : 'max-w-xl'
+    size === 'xl'
+      ? 'max-w-4xl'
+      : size === 'lg'
+        ? 'max-w-2xl'
+        : size === 'sm'
+          ? 'max-w-md'
+          : 'max-w-xl'
 
   return createPortal(
     <div
